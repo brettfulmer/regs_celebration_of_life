@@ -1,0 +1,286 @@
+.admin-sms {
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+  padding: 60px 0;
+}
+
+.admin-login {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.admin-login h2 {
+  margin: 0 0 24px 0;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.admin-tab:hover {
+  color: #2c3e50;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.admin-tab--active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+}
+
+.admin-send,
+.admin-logs {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.admin-form {
+  max-width: 800px;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.message-preview {
+  margin: 24px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.message-preview h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-content {
+  padding: 16px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  white-space: pre-wrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+
+.error-message {
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  font-size: 14px;
+}
+
+.send-results {
+  margin-top: 32px;
+}
+
+.send-results h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.results-table,
+.logs-table {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.results-table table,
+.logs-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-table th,
+.logs-table th {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.results-table td,
+.logs-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.results-table tr:last-child td,
+.logs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.results-table tr.success {
+  background: #f0fff4;
+}
+
+.results-table tr.error {
+  background: #fff5f5;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.logs-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.btn--small {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.no-logs {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-style: italic;
+}
+
+.log-inbound {
+  background: #f0f9ff;
+}
+
+.log-outbound {
+  background: #fff;
+}
+
+.direction-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.direction-inbound {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.direction-outbound {
+  background: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.message-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .admin-sms {
+    padding: 40px 0;
+  }
+
+  .admin-send,
+  .admin-logs {
+    padding: 20px;
+  }
+
+  .admin-login {
+    padding: 24px;
+    margin: 40px 20px;
+  }
+
+  .results-table,
+  .logs-table {
+    font-size: 12px;
+  }
+
+  .results-table th,
+  .results-table td,
+  .logs-table th,
+  .logs-table td {
+    padding: 8px 12px;
+  }
+
+  .message-cell {
+    max-width: 150px;
+  }
+}

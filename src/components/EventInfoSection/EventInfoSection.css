@@ -1,0 +1,121 @@
+/* ============================================
+   EVENT INFO SECTION STYLES
+   ============================================ */
+
+.event__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+}
+
+@media (min-width: 900px) {
+  .event__grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: start;
+  }
+}
+
+.event__card {
+  background: var(--color-bg-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xl);
+  border: 1px solid rgba(196, 167, 125, 0.35);
+}
+
+.event__card--map {
+  padding: var(--space-xl);
+}
+
+.event__card-title {
+  margin-bottom: var(--space-lg);
+}
+
+.event__list {
+  margin: 0;
+}
+
+.event__row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
+  border-top: 1px solid rgba(196, 167, 125, 0.25);
+}
+
+.event__row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.event__row dt {
+  font-weight: 600;
+  color: var(--color-ocean-deep);
+}
+
+.event__row dd {
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.event__venue {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.event__address {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-xs);
+}
+
+.event__note {
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  border-radius: var(--border-radius-md);
+  background: linear-gradient(
+    180deg,
+    rgba(212, 238, 243, 0.35) 0%,
+    rgba(245, 240, 232, 0.6) 100%
+  );
+}
+
+.event__note p {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-secondary);
+}
+
+.event__note p:last-child {
+  margin-bottom: 0;
+}
+
+.event__map-wrapper {
+  width: 100%;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(196, 167, 125, 0.35);
+  background: var(--color-bg-secondary);
+}
+
+.event__map {
+  width: 100%;
+  height: 340px;
+  border: 0;
+}
+
+@media (min-width: 900px) {
+  .event__map {
+    height: 420px;
+  }
+}
+
+.event__map-placeholder {
+  display: grid;
+  place-items: center;
+  height: 340px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-md);
+}

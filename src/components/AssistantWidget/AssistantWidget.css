@@ -1,0 +1,189 @@
+/* ============================================
+   ASSISTANT WIDGET (FLOATING) STYLES
+   ============================================ */
+
+.assistant-widget {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1200;
+}
+
+.assistant-widget__fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 14px;
+  border-radius: var(--border-radius-full);
+  background: var(--color-ocean-mid);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--transition-normal), background-color var(--transition-normal);
+}
+
+.assistant-widget__fab:hover {
+  background: var(--color-ocean-deep);
+  transform: translateY(-2px);
+}
+
+.assistant-widget__fab:focus-visible {
+  outline: 3px solid rgba(90, 154, 171, 0.35);
+  outline-offset: 3px;
+}
+
+.assistant-widget__fab-icon {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.assistant-widget__panel {
+  width: min(420px, calc(100vw - 32px));
+  height: min(560px, calc(100vh - 110px));
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(196, 167, 125, 0.35);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transform: translateY(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.assistant-widget__panel--open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.assistant-widget__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: linear-gradient(
+    180deg,
+    rgba(212, 238, 243, 0.55) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border-bottom: 1px solid rgba(196, 167, 125, 0.25);
+}
+
+.assistant-widget__title {
+  font-family: var(--font-family-primary);
+  color: var(--color-ocean-deep);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.assistant-widget__subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: 2px;
+}
+
+.assistant-widget__clear {
+  padding: 8px 10px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(45, 106, 122, 0.25);
+  color: var(--color-ocean-deep);
+  background: rgba(255, 255, 255, 0.65);
+  font-size: var(--font-size-sm);
+}
+
+.assistant-widget__clear:hover {
+  background: rgba(212, 238, 243, 0.6);
+}
+
+.assistant-widget__messages {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.assistant-msg {
+  display: grid;
+  gap: 4px;
+}
+
+.assistant-msg--assistant {
+  justify-items: start;
+}
+
+.assistant-msg--user {
+  justify-items: end;
+}
+
+.assistant-msg__bubble {
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-sm);
+  white-space: pre-wrap;
+}
+
+.assistant-msg--assistant .assistant-msg__bubble {
+  background: rgba(212, 238, 243, 0.55);
+  border: 1px solid rgba(45, 106, 122, 0.18);
+  color: var(--color-text-primary);
+}
+
+.assistant-msg--user .assistant-msg__bubble {
+  background: rgba(244, 198, 122, 0.28);
+  border: 1px solid rgba(232, 168, 73, 0.25);
+  color: var(--color-text-primary);
+}
+
+.assistant-msg__bubble--loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.assistant-msg__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.assistant-widget__composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-top: 1px solid rgba(196, 167, 125, 0.25);
+  background: var(--color-bg-primary);
+}
+
+.assistant-widget__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--color-sand-light);
+  border-radius: var(--border-radius-md);
+}
+
+.assistant-widget__input:focus {
+  outline: none;
+  border-color: var(--color-ocean-light);
+  box-shadow: 0 0 0 3px rgba(90, 154, 171, 0.2);
+}
+
+.assistant-widget__send {
+  padding: 10px 14px;
+  border-radius: var(--border-radius-md);
+  background: var(--color-ocean-mid);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+}
+
+.assistant-widget__send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -1,0 +1,9 @@
+{
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.87.3",
+    "busboy": "^1.6.0",
+    "twilio": "^5.3.5",
+    "openai": "^4.77.0"
+  }
+}

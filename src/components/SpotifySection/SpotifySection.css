@@ -1,0 +1,62 @@
+/* ============================================
+   SPOTIFY SECTION STYLES
+   ============================================ */
+
+.spotify {
+  padding: var(--space-3xl) 0;
+  background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-ocean) 100%);
+}
+
+.spotify__container {
+  max-width: var(--max-width-narrow);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  text-align: center;
+}
+
+.spotify__icon {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-md);
+}
+
+.spotify__heading {
+  margin-bottom: var(--space-md);
+  color: var(--color-ocean-deep);
+}
+
+.spotify__description {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-2xl);
+}
+
+.spotify__embed-wrapper {
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  background-color: var(--color-bg-primary);
+}
+
+.spotify__embed {
+  width: 100%;
+  min-height: 380px;
+  border: none;
+}
+
+@media (min-width: 768px) {
+  .spotify__embed {
+    min-height: 450px;
+  }
+}
+
+.spotify__note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
