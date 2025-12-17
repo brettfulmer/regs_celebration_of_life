@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './AdminSMSSection.css';
 import { apiGet, apiPost } from '../../utils/api';
 
