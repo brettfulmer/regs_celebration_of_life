@@ -957,6 +957,43 @@ button.status-badge:hover {
   flex-wrap: wrap;
 }
 
+.bulk-select-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-select-dropdown label {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.bulk-select-dropdown .form-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.bulk-select-dropdown .form-select:hover {
+  border-color: #d4a574;
+}
+
+.btn--outline {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.btn--outline:hover {
+  border-color: #999;
+  color: #333;
+}
+
 .selection-count {
   font-size: 13px;
   color: #666;

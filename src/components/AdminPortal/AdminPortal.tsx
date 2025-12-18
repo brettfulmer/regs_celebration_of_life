@@ -569,6 +569,43 @@ export function AdminPortal() {
     setActiveTab('sms-send');
   };
 
+  // Quick select functions for bulk operations
+  const selectByCategory = (category: 'all' | 'confirmed' | 'unconfirmed' | 'rsvp' | 'sms-only' | 'none') => {
+    if (category === 'none') {
+      setSelectedContacts(new Set());
+      return;
+    }
+    
+    const newSelected = new Set<string>();
+    contacts.forEach(c => {
+      if (c.optedOut) return; // Skip opted out
+      
+      let shouldSelect = false;
+      switch (category) {
+        case 'all':
+          shouldSelect = true;
+          break;
+        case 'confirmed':
+          shouldSelect = c.confirmed;
+          break;
+        case 'unconfirmed':
+          shouldSelect = c.hasRsvp && !c.confirmed;
+          break;
+        case 'rsvp':
+          shouldSelect = c.hasRsvp;
+          break;
+        case 'sms-only':
+          shouldSelect = !c.hasRsvp;
+          break;
+      }
+      
+      if (shouldSelect) {
+        newSelected.add(c.phone);
+      }
+    });
+    setSelectedContacts(newSelected);
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadStats();
@@ -1336,21 +1373,45 @@ export function AdminPortal() {
 
                 {/* Bulk Actions */}
                 <div className="bulk-actions">
+                  <div className="bulk-select-dropdown">
+                    <label>Quick Select:</label>
+                    <select 
+                      onChange={(e) => selectByCategory(e.target.value as any)}
+                      value=""
+                      className="form-select"
+                    >
+                      <option value="" disabled>Choose group...</option>
+                      <option value="all">✓ All Contacts</option>
+                      <option value="confirmed">✓ Confirmed Only</option>
+                      <option value="unconfirmed">✓ Unconfirmed RSVPs</option>
+                      <option value="rsvp">✓ All RSVPs</option>
+                      <option value="sms-only">✓ SMS Only (No RSVP)</option>
+                      <option value="none">✗ Clear Selection</option>
+                    </select>
+                  </div>
                   <button 
                     className="btn btn--small"
                     onClick={selectAllFilteredContacts}
                   >
                     {filteredContacts.filter(c => !c.optedOut).every(c => selectedContacts.has(c.phone)) 
-                      ? '☐ Deselect All' 
-                      : '☑ Select All'}
+                      ? '☐ Deselect Shown' 
+                      : '☑ Select Shown'}
                   </button>
                   {selectedContacts.size > 0 && (
-                    <button 
-                      className="btn btn--warm btn--small"
-                      onClick={sendToSelectedContacts}
-                    >
-                      📤 SMS {selectedContacts.size} Selected
-                    </button>
+                    <>
+                      <button 
+                        className="btn btn--warm btn--small"
+                        onClick={sendToSelectedContacts}
+                      >
+                        📤 SMS {selectedContacts.size} Selected
+                      </button>
+                      <button 
+                        className="btn btn--small btn--outline"
+                        onClick={() => setSelectedContacts(new Set())}
+                      >
+                        ✗ Clear
+                      </button>
+                    </>
                   )}
                   <span className="selection-count">
                     {selectedContacts.size} selected • {filteredContacts.length} shown
