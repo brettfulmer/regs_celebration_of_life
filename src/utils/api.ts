@@ -61,6 +61,36 @@ export async function apiPost(
   });
 }
 
+export async function apiPatch(
+  endpoint: string,
+  body: any,
+  headers: Record<string, string> = {}
+): Promise<Response> {
+  return apiFetch(endpoint, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: JSON.stringify(body)
+  });
+}
+
+export async function apiDelete(
+  endpoint: string,
+  body: any,
+  headers: Record<string, string> = {}
+): Promise<Response> {
+  return apiFetch(endpoint, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: JSON.stringify(body)
+  });
+}
+
 export async function apiPostFormData(
   endpoint: string,
   formData: FormData

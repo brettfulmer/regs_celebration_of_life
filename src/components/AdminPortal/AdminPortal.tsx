@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './AdminPortal.css';
-import { apiGet, apiPost } from '../../utils/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '../../utils/api';
 
 interface Stats {
   rsvps: {
@@ -49,6 +49,17 @@ interface Stats {
   };
 }
 
+interface Memory {
+  id: string;
+  name: string;
+  message: string;
+  relationship?: string;
+  image_path?: string;
+  approved: boolean;
+  featured: boolean;
+  created_at: string;
+}
+
 interface Recipient {
   phone: string;
   name?: string;
@@ -76,6 +87,14 @@ interface SMSLog {
 
 type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'rsvps' | 'memories';
 
+// SMS Templates
+const SMS_TEMPLATES = {
+  reminder: "Hi {name}! Just a friendly reminder to confirm your RSVP for Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Reply YES to confirm. 🕊️",
+  update: "Hi {name}! Update for Reg's Celebration of Life: [YOUR MESSAGE HERE]. See https://regscelebrationoflife.netlify.app/ for details. 🕊️",
+  thankyou: "Hi {name}! Thank you for confirming your attendance at Reg's Celebration of Life. We look forward to seeing you on Mon 12 Jan 2026 at 2pm. 🕊️",
+  finalDetails: "Hi {name}! Final details for Reg's Celebration of Life: Mon 12 Jan 2026, 2pm at Coogee Legion Club, 200 Arden St, Coogee. Parking available nearby. See you there! 🕊️"
+};
+
 export function AdminPortal() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -91,7 +110,16 @@ export function AdminPortal() {
   const [sendResults, setSendResults] = useState<SendResult[]>([]);
   const [logs, setLogs] = useState<SMSLog[]>([]);
   
+  // Memories state
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [isLoadingMemories, setIsLoadingMemories] = useState(false);
+  
+  // Reminder state
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
+  const [reminderResults, setReminderResults] = useState<SendResult[] | null>(null);
+  
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const adminPassword = 'reg2025memorial';
 
@@ -142,6 +170,158 @@ export function AdminPortal() {
     } catch (err: any) {
       setError(err.message || 'Failed to load logs');
     }
+  };
+
+  const loadMemories = async () => {
+    setIsLoadingMemories(true);
+    try {
+      const response = await apiGet('/.netlify/functions/admin-memories', {
+        'Authorization': `Bearer ${adminPassword}`
+      });
+
+      if (!response.ok) throw new Error('Failed to load memories');
+
+      const data = await response.json();
+      setMemories(data.memories || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load memories');
+    } finally {
+      setIsLoadingMemories(false);
+    }
+  };
+
+  const handleApproveMemory = async (id: string, approved: boolean) => {
+    try {
+      const response = await apiPatch('/.netlify/functions/admin-memories', 
+        { id, approved },
+        { 'Authorization': `Bearer ${adminPassword}` }
+      );
+
+      if (!response.ok) throw new Error('Failed to update memory');
+
+      setMemories(prev => prev.map(m => m.id === id ? { ...m, approved } : m));
+      setSuccessMessage(`Memory ${approved ? 'approved' : 'unapproved'}`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleDeleteMemory = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this memory? This cannot be undone.')) return;
+
+    try {
+      const response = await apiDelete('/.netlify/functions/admin-memories',
+        { id },
+        { 'Authorization': `Bearer ${adminPassword}` }
+      );
+
+      if (!response.ok) throw new Error('Failed to delete memory');
+
+      setMemories(prev => prev.filter(m => m.id !== id));
+      setSuccessMessage('Memory deleted');
+      loadStats();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleDeleteRSVP = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete ${name}'s RSVP?`)) return;
+
+    try {
+      const response = await apiDelete('/.netlify/functions/admin-rsvps',
+        { id },
+        { 'Authorization': `Bearer ${adminPassword}` }
+      );
+
+      if (!response.ok) throw new Error('Failed to delete RSVP');
+
+      setSuccessMessage('RSVP deleted');
+      loadStats();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleToggleConfirmation = async (id: string, currentStatus: boolean) => {
+    try {
+      const response = await apiPatch('/.netlify/functions/admin-rsvps',
+        { id, confirmed: !currentStatus },
+        { 'Authorization': `Bearer ${adminPassword}` }
+      );
+
+      if (!response.ok) throw new Error('Failed to update RSVP');
+
+      setSuccessMessage(`RSVP ${!currentStatus ? 'confirmed' : 'unconfirmed'}`);
+      loadStats();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleSendReminders = async () => {
+    if (!confirm(`Send reminder SMS to ${stats?.rsvps.unconfirmed || 0} unconfirmed RSVPs?`)) return;
+
+    setIsSendingReminder(true);
+    setReminderResults(null);
+    setError('');
+
+    try {
+      const response = await apiPost('/.netlify/functions/sms-reminder',
+        { type: 'unconfirmed' },
+        { 'Authorization': `Bearer ${adminPassword}` }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || 'Failed to send reminders');
+
+      setReminderResults(data.results || []);
+      setSuccessMessage(`Sent ${data.sent} reminders (${data.failed} failed, ${data.skipped} skipped)`);
+      loadStats();
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSendingReminder(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await apiGet('/.netlify/functions/admin-rsvps?format=csv', {
+        'Authorization': `Bearer ${adminPassword}`
+      });
+
+      if (!response.ok) throw new Error('Failed to export');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `rsvps-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const applyTemplate = (templateKey: keyof typeof SMS_TEMPLATES) => {
+    setMessage(SMS_TEMPLATES[templateKey]);
+  };
+
+  const loadUnconfirmedAsRecipients = () => {
+    if (!stats) return;
+    const unconfirmed = stats.rsvps.list.filter(r => !r.confirmed && r.phone);
+    const text = unconfirmed.map(r => `${r.phone},${r.name}`).join('\n');
+    setRecipientsText(text);
   };
 
   const parseRecipients = (): Recipient[] => {
@@ -255,6 +435,9 @@ export function AdminPortal() {
     if (activeTab === 'sms-logs') {
       loadLogs();
     }
+    if (activeTab === 'memories') {
+      loadMemories();
+    }
   }, [activeTab]);
 
   if (!isAuthenticated) {
@@ -331,6 +514,7 @@ export function AdminPortal() {
         </div>
 
         {error && <div className="error-message">{error}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
 
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
@@ -438,6 +622,16 @@ export function AdminPortal() {
                   <div className="dashboard-section">
                     <h3>Quick Actions</h3>
                     <div className="quick-actions">
+                      <button 
+                        className="action-btn action-btn--primary" 
+                        onClick={handleSendReminders}
+                        disabled={isSendingReminder || !stats?.rsvps.unconfirmed}
+                      >
+                        {isSendingReminder ? '⏳ Sending...' : `📲 Send Reminders (${stats?.rsvps.unconfirmed || 0} pending)`}
+                      </button>
+                      <button className="action-btn" onClick={handleExportCSV}>
+                        📥 Export RSVPs (CSV)
+                      </button>
                       <button className="action-btn" onClick={() => setActiveTab('sms-send')}>
                         📤 Send Bulk SMS
                       </button>
@@ -457,6 +651,20 @@ export function AdminPortal() {
                       </a>
                     </div>
                   </div>
+
+                  {reminderResults && reminderResults.length > 0 && (
+                    <div className="dashboard-section">
+                      <h3>Reminder Results</h3>
+                      <div className="reminder-results">
+                        {reminderResults.map((r, i) => (
+                          <div key={i} className={`reminder-result ${r.success ? 'success' : 'failed'}`}>
+                            <span>{r.name}</span>
+                            <span>{r.success ? '✓ Sent' : `✗ ${r.error}`}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -470,10 +678,22 @@ export function AdminPortal() {
           <div className="admin-content">
             <div className="content-header">
               <h2>RSVP List ({stats.rsvps.total} RSVPs • {stats.rsvps.totalGuests || stats.rsvps.total} guests)</h2>
-              <div className="rsvp-summary">
-                <span className="badge badge-success">✅ {stats.rsvps.confirmedGuests || 0} confirmed</span>
-                <span className="badge badge-warning">⏳ {stats.rsvps.unconfirmedGuests || 0} pending</span>
+              <div className="content-actions">
+                <button className="btn btn--small" onClick={handleExportCSV}>
+                  📥 Export CSV
+                </button>
+                <button 
+                  className="btn btn--small btn--primary" 
+                  onClick={handleSendReminders}
+                  disabled={isSendingReminder || !stats.rsvps.unconfirmed}
+                >
+                  📲 Send Reminders
+                </button>
               </div>
+            </div>
+            <div className="rsvp-summary">
+              <span className="badge badge-success">✅ {stats.rsvps.confirmedGuests || 0} confirmed</span>
+              <span className="badge badge-warning">⏳ {stats.rsvps.unconfirmedGuests || 0} pending</span>
             </div>
             {stats.rsvps.list.length === 0 ? (
               <p className="no-data">No RSVPs yet.</p>
@@ -489,23 +709,24 @@ export function AdminPortal() {
                       <th>Status</th>
                       <th>SMS</th>
                       <th>Date</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {stats.rsvps.list.map((rsvp, idx) => (
-                      <tr key={idx} className={rsvp.confirmed ? 'row-confirmed' : 'row-pending'}>
+                    {stats.rsvps.list.map((rsvp) => (
+                      <tr key={rsvp.id} className={rsvp.confirmed ? 'row-confirmed' : 'row-pending'}>
                         <td>{rsvp.name}</td>
                         <td>{rsvp.email}</td>
                         <td>{formatPhoneNumber(rsvp.phone)}</td>
                         <td>{rsvp.guests || 1}</td>
                         <td>
-                          {rsvp.confirmed ? (
-                            <span className="status-badge status-confirmed" title={rsvp.confirmed_at ? `Confirmed ${formatDate(rsvp.confirmed_at)}` : ''}>
-                              ✅ Confirmed
-                            </span>
-                          ) : (
-                            <span className="status-badge status-pending">⏳ Pending</span>
-                          )}
+                          <button 
+                            className={`status-badge ${rsvp.confirmed ? 'status-confirmed' : 'status-pending'}`}
+                            onClick={() => handleToggleConfirmation(rsvp.id, rsvp.confirmed)}
+                            title="Click to toggle"
+                          >
+                            {rsvp.confirmed ? '✅ Confirmed' : '⏳ Pending'}
+                          </button>
                         </td>
                         <td>
                           {rsvp.sms_sent ? (
@@ -517,6 +738,15 @@ export function AdminPortal() {
                           )}
                         </td>
                         <td>{formatDate(rsvp.created_at)}</td>
+                        <td>
+                          <button 
+                            className="btn-icon btn-icon--danger" 
+                            onClick={() => handleDeleteRSVP(rsvp.id, rsvp.name)}
+                            title="Delete RSVP"
+                          >
+                            🗑️
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -527,20 +757,76 @@ export function AdminPortal() {
         )}
 
         {/* Memories Tab */}
-        {activeTab === 'memories' && stats && (
+        {activeTab === 'memories' && (
           <div className="admin-content">
             <div className="content-header">
               <h2>Memory Management</h2>
-              <div className="memory-stats">
-                <span className="badge badge-success">{stats.memories.approved} Approved</span>
-                <span className="badge badge-warning">{stats.memories.pending} Pending</span>
-                <span className="badge badge-info">{stats.memories.withPhotos} With Photos</span>
-              </div>
+              <button className="btn btn--small" onClick={loadMemories}>
+                🔄 Refresh
+              </button>
             </div>
-            <p className="info-text">
-              Memories are automatically approved (MEMORIES_AUTO_APPROVE=true). 
-              To manage individual memories, access the Supabase dashboard or adjust the approval settings.
-            </p>
+            <div className="memory-stats">
+              <span className="badge badge-success">{memories.filter(m => m.approved).length} Approved</span>
+              <span className="badge badge-warning">{memories.filter(m => !m.approved).length} Pending</span>
+              <span className="badge badge-info">{memories.filter(m => m.image_path).length} With Photos</span>
+            </div>
+            
+            {isLoadingMemories ? (
+              <div className="loading">Loading memories...</div>
+            ) : memories.length === 0 ? (
+              <p className="no-data">No memories submitted yet.</p>
+            ) : (
+              <div className="memories-grid">
+                {memories.map((memory) => (
+                  <div key={memory.id} className={`memory-card ${memory.approved ? 'memory-card--approved' : 'memory-card--pending'}`}>
+                    {memory.image_path && (
+                      <div className="memory-card__image">
+                        <img 
+                          src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/memories/${memory.image_path}`} 
+                          alt="Memory" 
+                        />
+                      </div>
+                    )}
+                    <div className="memory-card__content">
+                      <div className="memory-card__header">
+                        <strong>{memory.name}</strong>
+                        {memory.relationship && <span className="memory-card__relationship">{memory.relationship}</span>}
+                      </div>
+                      <p className="memory-card__message">{memory.message}</p>
+                      <div className="memory-card__footer">
+                        <span className="memory-card__date">{formatDate(memory.created_at)}</span>
+                        <span className={`status-badge ${memory.approved ? 'status-confirmed' : 'status-pending'}`}>
+                          {memory.approved ? '✅ Approved' : '⏳ Pending'}
+                        </span>
+                      </div>
+                      <div className="memory-card__actions">
+                        {!memory.approved ? (
+                          <button 
+                            className="btn btn--small btn--success" 
+                            onClick={() => handleApproveMemory(memory.id, true)}
+                          >
+                            ✓ Approve
+                          </button>
+                        ) : (
+                          <button 
+                            className="btn btn--small btn--warning" 
+                            onClick={() => handleApproveMemory(memory.id, false)}
+                          >
+                            ↩ Unapprove
+                          </button>
+                        )}
+                        <button 
+                          className="btn btn--small btn--danger" 
+                          onClick={() => handleDeleteMemory(memory.id)}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -550,6 +836,19 @@ export function AdminPortal() {
             <div className="sms-form">
               <h2>Send Bulk SMS</h2>
               
+              <div className="form-section">
+                <h3>Quick Load Recipients</h3>
+                <div className="quick-load-buttons">
+                  <button 
+                    className="btn btn--small"
+                    onClick={loadUnconfirmedAsRecipients}
+                    disabled={!stats?.rsvps.unconfirmed}
+                  >
+                    Load Unconfirmed ({stats?.rsvps.unconfirmed || 0})
+                  </button>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label className="form-label" htmlFor="recipients">
                   Recipients
@@ -565,6 +864,24 @@ export function AdminPortal() {
                 />
               </div>
 
+              <div className="form-section">
+                <h3>Message Templates</h3>
+                <div className="template-buttons">
+                  <button className="btn btn--small" onClick={() => applyTemplate('reminder')}>
+                    📲 Reminder
+                  </button>
+                  <button className="btn btn--small" onClick={() => applyTemplate('thankyou')}>
+                    🙏 Thank You
+                  </button>
+                  <button className="btn btn--small" onClick={() => applyTemplate('finalDetails')}>
+                    📋 Final Details
+                  </button>
+                  <button className="btn btn--small" onClick={() => applyTemplate('update')}>
+                    📢 Update
+                  </button>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label className="form-label" htmlFor="message">Message</label>
                 <textarea
@@ -572,11 +889,11 @@ export function AdminPortal() {
                   className="form-textarea"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Your message..."
+                  placeholder="Your message... Use {name} for personalization"
                   rows={4}
                 />
                 <div className="form-hint">
-                  {message.length} characters
+                  {message.length} characters • Use {'{name}'} to personalize
                 </div>
               </div>
 
