@@ -788,3 +788,81 @@ button.status-badge:hover {
   margin-bottom: 16px;
 }
 
+/* Questions Tab Styles */
+.questions-summary {
+  margin-bottom: 32px;
+}
+
+.questions-summary h3,
+.questions-list h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.category-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #d4a574;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.category-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.category-count {
+  background: #d4a574;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.category-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.example-text {
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.questions-list {
+  margin-top: 24px;
+}
+
+.question-cell {
+  background: #fff9f0;
+  font-weight: 500;
+}
+
+.response-cell {
+  background: #f0f9f0;
+}
+
+.no-response {
+  color: #999;
+  font-style: italic;
+}
+

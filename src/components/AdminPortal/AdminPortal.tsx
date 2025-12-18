@@ -85,7 +85,22 @@ interface SMSLog {
   is_bulk: boolean;
 }
 
-type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'rsvps' | 'memories';
+interface Question {
+  id: string;
+  timestamp: string;
+  phone: string;
+  question: string;
+  response: string | null;
+}
+
+interface QuestionSummary {
+  [category: string]: {
+    count: number;
+    examples: string[];
+  };
+}
+
+type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'sms-questions' | 'rsvps' | 'memories';
 
 // SMS Templates
 const SMS_TEMPLATES = {
@@ -109,6 +124,11 @@ export function AdminPortal() {
   const [isSending, setIsSending] = useState(false);
   const [sendResults, setSendResults] = useState<SendResult[]>([]);
   const [logs, setLogs] = useState<SMSLog[]>([]);
+  
+  // Questions state
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questionSummary, setQuestionSummary] = useState<QuestionSummary>({});
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   
   // Memories state
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -169,6 +189,27 @@ export function AdminPortal() {
       setLogs(data.logs || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load logs');
+    }
+  };
+
+  const loadQuestions = async () => {
+    setIsLoadingQuestions(true);
+    try {
+      const response = await apiGet('/.netlify/functions/sms-questions', {
+        'Authorization': `Bearer ${adminPassword}`
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load questions');
+      }
+
+      const data = await response.json();
+      setQuestions(data.questions || []);
+      setQuestionSummary(data.summary || {});
+    } catch (err: any) {
+      setError(err.message || 'Failed to load questions');
+    } finally {
+      setIsLoadingQuestions(false);
     }
   };
 
@@ -435,6 +476,9 @@ export function AdminPortal() {
     if (activeTab === 'sms-logs') {
       loadLogs();
     }
+    if (activeTab === 'sms-questions') {
+      loadQuestions();
+    }
     if (activeTab === 'memories') {
       loadMemories();
     }
@@ -510,6 +554,12 @@ export function AdminPortal() {
             onClick={() => setActiveTab('sms-logs')}
           >
             📨 SMS Logs
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'sms-questions' ? 'admin-tab--active' : ''}`}
+            onClick={() => setActiveTab('sms-questions')}
+          >
+            ❓ Questions
           </button>
         </div>
 
@@ -1006,6 +1056,81 @@ export function AdminPortal() {
                   </tbody>
                 </table>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Questions Tab */}
+        {activeTab === 'sms-questions' && (
+          <div className="admin-content">
+            <div className="content-header">
+              <h2>Common Questions & Responses</h2>
+              <button className="btn btn--small" onClick={loadQuestions}>
+                Refresh
+              </button>
+            </div>
+
+            {isLoadingQuestions ? (
+              <div className="loading">Loading questions...</div>
+            ) : (
+              <>
+                {/* Question Categories Summary */}
+                {Object.keys(questionSummary).length > 0 && (
+                  <div className="questions-summary">
+                    <h3>Question Categories</h3>
+                    <div className="category-grid">
+                      {Object.entries(questionSummary)
+                        .sort((a, b) => b[1].count - a[1].count)
+                        .map(([category, data]) => (
+                          <div key={category} className="category-card">
+                            <div className="category-header">
+                              <span className="category-name">{category}</span>
+                              <span className="category-count">{data.count}</span>
+                            </div>
+                            <div className="category-examples">
+                              {data.examples.slice(0, 2).map((ex, i) => (
+                                <div key={i} className="example-text">"{ex.substring(0, 60)}{ex.length > 60 ? '...' : ''}"</div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* All Questions List */}
+                {questions.length === 0 ? (
+                  <p className="no-data">No questions received yet. Simple confirmations (YES, STOP, numbers) are filtered out.</p>
+                ) : (
+                  <div className="questions-list">
+                    <h3>All Questions ({questions.length})</h3>
+                    <div className="data-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Time</th>
+                            <th>From</th>
+                            <th>Question</th>
+                            <th>AI Response</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {questions.map((q) => (
+                            <tr key={q.id}>
+                              <td>{formatTimestamp(q.timestamp)}</td>
+                              <td>{q.phone}</td>
+                              <td className="message-cell question-cell">{q.question}</td>
+                              <td className="message-cell response-cell">
+                                {q.response || <span className="no-response">No response logged</span>}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
