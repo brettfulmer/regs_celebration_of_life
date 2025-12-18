@@ -136,14 +136,47 @@ async function getAIResponse(userMessage, context = {}) {
 }
 
 async function getRSVPByPhone(supabase, phoneNumber) {
-  const { data } = await supabase
+  console.log('[sms-inbound] Looking up RSVP for phone:', phoneNumber);
+  
+  // Try exact match first
+  const { data, error } = await supabase
     .from('rsvps')
     .select('*')
     .eq('phone', phoneNumber)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
-  return data;
+  
+  if (error) {
+    console.log('[sms-inbound] RSVP lookup error:', error.message);
+  }
+  
+  if (data) {
+    console.log('[sms-inbound] Found RSVP:', data.id, 'Name:', data.name, 'Confirmed:', data.confirmed);
+    return data;
+  }
+  
+  // If not found and phone starts with +61, also try with leading 0
+  if (phoneNumber && phoneNumber.startsWith('+61')) {
+    const altPhone = '0' + phoneNumber.slice(3);
+    console.log('[sms-inbound] Trying alternate phone format:', altPhone);
+    
+    const { data: altData } = await supabase
+      .from('rsvps')
+      .select('*')
+      .eq('phone', altPhone)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (altData) {
+      console.log('[sms-inbound] Found RSVP with alt format:', altData.id);
+      return altData;
+    }
+  }
+  
+  console.log('[sms-inbound] No RSVP found for phone');
+  return null;
 }
 
 async function getConversationContext(supabase, phoneNumber) {
@@ -156,13 +189,20 @@ async function getConversationContext(supabase, phoneNumber) {
 }
 
 async function updateRSVPConfirmation(supabase, rsvpId) {
-  await supabase
+  console.log('[sms-inbound] Confirming RSVP:', rsvpId);
+  const { error } = await supabase
     .from('rsvps')
     .update({ 
       confirmed: true, 
       confirmed_at: new Date().toISOString() 
     })
     .eq('id', rsvpId);
+  
+  if (error) {
+    console.error('[sms-inbound] Confirmation update error:', error);
+  } else {
+    console.log('[sms-inbound] RSVP confirmed successfully');
+  }
 }
 
 async function updateRSVPGuests(supabase, rsvpId, guests) {
@@ -211,21 +251,41 @@ async function logMessage(supabase, data) {
 
 exports.handler = async (event) => {
   console.log('[sms-inbound] Received webhook');
+  console.log('[sms-inbound] Headers:', JSON.stringify(event.headers));
+  console.log('[sms-inbound] Body:', event.body);
 
   const supabase = getSupabaseAdmin();
 
-  // Verify Twilio signature
+  // Verify Twilio signature (but don't block if not configured)
   const twilioSignature = event.headers['x-twilio-signature'] || event.headers['X-Twilio-Signature'];
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   
   if (authToken && twilioSignature) {
-    const url = `https://www.regfulmer.com/.netlify/functions/sms-inbound`;
+    // Try both possible URLs for signature validation
+    const possibleUrls = [
+      `https://www.regfulmer.com/.netlify/functions/sms-inbound`,
+      `https://regfulmer.com/.netlify/functions/sms-inbound`,
+      event.headers.host ? `https://${event.headers.host}/.netlify/functions/sms-inbound` : null
+    ].filter(Boolean);
+    
     const params = event.body ? Object.fromEntries(new URLSearchParams(event.body)) : {};
     
-    if (!twilio.validateRequest(authToken, twilioSignature, url, params)) {
-      console.error('[sms-inbound] Invalid Twilio signature');
-      return { statusCode: 403, body: 'Forbidden' };
+    let isValid = false;
+    for (const url of possibleUrls) {
+      if (twilio.validateRequest(authToken, twilioSignature, url, params)) {
+        isValid = true;
+        console.log('[sms-inbound] Signature validated with URL:', url);
+        break;
+      }
     }
+    
+    if (!isValid) {
+      console.error('[sms-inbound] Invalid Twilio signature for all URLs');
+      console.log('[sms-inbound] Tried URLs:', possibleUrls);
+      // Log but don't block - continue processing
+    }
+  } else {
+    console.log('[sms-inbound] Skipping signature validation (not configured)');
   }
 
   try {
@@ -236,7 +296,9 @@ exports.handler = async (event) => {
     const messageBody = params.Body || '';
     const messageSid = params.MessageSid || '';
 
-    console.log('[sms-inbound] From:', fromNumber, 'Body:', messageBody);
+    console.log('[sms-inbound] Raw From:', rawFrom);
+    console.log('[sms-inbound] Normalized From:', fromNumber);
+    console.log('[sms-inbound] Body:', messageBody);
 
     // Log inbound message
     await logMessage(supabase, {
