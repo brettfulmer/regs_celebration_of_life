@@ -49,8 +49,8 @@ export const heroContent = {
   heroImageUrl: '/images/reg-hero.jpg',
   heroImageAlt: 'Reg Fulmer smiling at the beach',
   headline: 'Celebrating the Life of Reg Fulmer',
-  subheadline: 'Robert. Reg. Reggie. Pickles. Dad. Uncle Reggie. Son, Brother. Husband. The bloke who never met a stranger.',
-  introParagraph: `This is not a formal church service. It's a chance for all of us to come together and remember Reg the way he would have wanted: with stories, laughs, maybe a few tears, and definitely a drink in hand. It's a space to chat, listen to the music he chose for his memorial, share a memory, or simply take a quiet moment to remember the man who touched so many lives.`
+  subheadline: 'Robert. Reg. Reggie. Pickles. The bloke who never met a stranger.',
+  introParagraph: `This isn't a formal church service. It's a relaxed get together by the beach to remember Reg the way he would have wanted: with stories, laughs, a few tears, and a drink in hand. Come for a chat, share a memory, or just take a quiet moment.`
 };
 
 // ============================================
