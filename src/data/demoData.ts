@@ -300,11 +300,11 @@ Important constraints:
 • It is acceptable to say something like: "It's a relaxed celebration where people can stand, mingle, listen to some words being shared, and have a drink or some food while they remember Reg."
 
 Current event details:
-- Date: Monday, 12th December 2025
-- Time: 2:00 PM onwards
-- Venue: Horizons
-- Address: 1R Marine Parade, Maroubra NSW 2035, South Maroubra Surf Life Saving Club
-- Dress code: Relaxed and comfortable — think coastal casual. No need for anything formal.
+- Date: ${siteConfig.eventDetails.date}
+- Time: ${siteConfig.eventDetails.time}
+- Venue: ${siteConfig.eventDetails.venue}
+- Address: ${siteConfig.eventDetails.address}
+- Dress code: ${siteConfig.eventDetails.dressCode}
 
 Be warm, helpful, and embody the same spirit that Reg did — welcoming everyone like an old friend.`
 };
