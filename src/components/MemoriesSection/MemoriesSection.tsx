@@ -167,8 +167,8 @@ export function MemoriesSection() {
           <div className="memories__form">
             <h3 className="memories__heading">Share a Memory</h3>
             <p className="memories__guidance">
-              Keep it casual: a funny moment, something he said, a time he showed up for you,
-              or just a simple “miss you, mate.”
+              Share a photo and a short memory — maybe where it was taken, what was happening,
+              or just something you remember about that moment. A few sentences is plenty.
             </p>
 
             <form onSubmit={onSubmit} className="memories-form">
@@ -202,7 +202,7 @@ export function MemoriesSection() {
                   required
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write something warm, honest, or a bit cheeky…"
+                  placeholder="e.g. This was at Coogee Beach, 2019. We'd just finished a swim and Reg was telling one of his classic stories…"
                 />
                 <div className="form-hint">Even two lines is perfect.</div>
               </div>
@@ -217,7 +217,7 @@ export function MemoriesSection() {
                   onChange={(e) => setImage(e.target.files?.[0])}
                 />
                 <div className="form-hint">
-                  In production this image will be transformed into a Polaroid using the configured prompt.
+                  Got a photo with Reg? Add it here with a bit of context about when and where.
                 </div>
               </div>
 
@@ -240,7 +240,10 @@ export function MemoriesSection() {
             <div className="memories__wall-inner">
               {approved.length === 0 ? (
                 <div className="memories__empty" role="note">
-                  No polaroids yet — be the first to add one.
+                  <p className="memories__empty-title">This wall is waiting for your memories</p>
+                  <p className="memories__empty-text">
+                    Share a photo with Reg and tell us a bit about the moment — where it was, what was happening, why it sticks with you. Even just a line or two makes it special.
+                  </p>
                 </div>
               ) : (
                 approved.map((m, idx) => (

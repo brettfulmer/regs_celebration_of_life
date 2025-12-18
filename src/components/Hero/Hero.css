@@ -153,3 +153,13 @@
   color: var(--color-text-inverse);
   font-size: var(--font-size-4xl);
 }
+
+/* Share buttons */
+.hero__share {
+  margin-top: var(--space-xl);
+  display: flex;
+  justify-content: center;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 1s;
+  opacity: 0;
+}
