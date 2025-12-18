@@ -7,6 +7,16 @@ function checkAuth(event) {
   return authHeader === `Bearer ${adminPassword}`;
 }
 
+function getBucket() {
+  return process.env.SUPABASE_BUCKET || 'memories';
+}
+
+function publicUrlFor(supabase, bucket, path) {
+  if (!path) return undefined;
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data?.publicUrl;
+}
+
 exports.handler = async (event) => {
   console.log('[admin-memories] Request received:', event.httpMethod);
 
@@ -20,6 +30,7 @@ exports.handler = async (event) => {
   }
 
   const supabase = getSupabaseAdmin();
+  const bucket = getBucket();
 
   // GET - List all memories with details
   if (event.httpMethod === 'GET') {
@@ -31,7 +42,14 @@ exports.handler = async (event) => {
 
       if (error) throw error;
 
-      return json(200, { memories: memories || [] }, corsHeaders());
+      // Add full URLs for images
+      const memoriesWithUrls = (memories || []).map(m => ({
+        ...m,
+        imageUrl: publicUrlFor(supabase, bucket, m.image_path),
+        polaroidUrl: publicUrlFor(supabase, bucket, m.polaroid_path)
+      }));
+
+      return json(200, { memories: memoriesWithUrls }, corsHeaders());
     } catch (error) {
       console.error('[admin-memories] GET error:', error);
       return json(500, { error: error.message }, corsHeaders());

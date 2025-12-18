@@ -63,6 +63,8 @@ interface Memory {
   message: string;
   relationship?: string;
   image_path?: string;
+  imageUrl?: string;
+  polaroidUrl?: string;
   approved: boolean;
   featured: boolean;
   created_at: string;
@@ -1238,7 +1240,7 @@ export function AdminPortal() {
             <div className="memory-stats">
               <span className="badge badge-success">{memories.filter(m => m.approved).length} Approved</span>
               <span className="badge badge-warning">{memories.filter(m => !m.approved).length} Pending</span>
-              <span className="badge badge-info">{memories.filter(m => m.image_path).length} With Photos</span>
+              <span className="badge badge-info">{memories.filter(m => m.imageUrl || m.image_path).length} With Photos</span>
             </div>
             
             {isLoadingMemories ? (
@@ -1249,11 +1251,14 @@ export function AdminPortal() {
               <div className="memories-grid">
                 {memories.map((memory) => (
                   <div key={memory.id} className={`memory-card ${memory.approved ? 'memory-card--approved' : 'memory-card--pending'}`}>
-                    {memory.image_path && (
+                    {(memory.imageUrl || memory.image_path) && (
                       <div className="memory-card__image">
                         <img 
-                          src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/memories/${memory.image_path}`} 
+                          src={memory.imageUrl || memory.image_path} 
                           alt="Memory" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
                         />
                       </div>
                     )}
