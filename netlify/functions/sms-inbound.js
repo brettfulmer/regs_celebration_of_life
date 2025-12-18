@@ -7,7 +7,7 @@ Key Event Details:
 - Person: Robert "Reg" Fulmer
 - Date: Monday, 12th January 2026
 - Time: 2:00 PM AEDT
-- Venue: Coogee Legion Club, 201 Arden St, Coogee NSW 2034
+- Venue: Coogee Legion Club, 200 Arden St, Coogee NSW 2034
 - Address: Coogee, Sydney
 - Website: https://regscelebrationoflife.netlify.app/
 
