@@ -18,7 +18,7 @@ export const siteConfig: SiteConfig = {
   eventDetails: {
     // TODO: Update with actual event details
     date: 'Monday, 12th December 2025',
-    time: '2:00 PM onwards',
+    time: '2:00 PM',
     venue: 'Horizons',
     address: '1R Marine Parade, Maroubra NSW 2035\nSouth Maroubra Surf Life Saving Club',
     mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.683!2d151.2555689!3d-33.9512464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12b15fac9e6bed%3A0x9a9438b0689cfd71!2sHorizons!5e0!3m2!1sen!2sau!4v1734480000000!5m2!1sen!2sau',
