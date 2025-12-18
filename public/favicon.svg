@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .bg { fill: #040C30; }
+      .wave { fill: none; stroke: #23A5B9; stroke-linecap: round; stroke-linejoin: round; }
+      .sun { fill: #FF6B5E; }
+    </style>
+  </defs>
+  <circle class="bg" cx="256" cy="256" r="240"/>
+  <circle class="sun" cx="348" cy="170" r="42"/>
+  <path class="wave" stroke-width="32" d="M 92 298 C 160 270, 220 326, 288 298 S 416 326, 420 298"/>
+  <path class="wave" stroke-width="24" d="M 104 350 C 168 330, 232 372, 296 350 S 416 372, 408 350"/>
+  <path class="wave" stroke-width="18" d="M 120 400 C 184 386, 246 414, 310 400 S 402 414, 392 400"/>
+</svg>
