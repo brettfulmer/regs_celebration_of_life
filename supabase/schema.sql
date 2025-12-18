@@ -40,6 +40,7 @@ create table if not exists public.rsvps (
   name text not null,
   email text not null,
   phone text not null,
+  guests integer not null default 1,
   created_at timestamptz not null default now()
 );
 
