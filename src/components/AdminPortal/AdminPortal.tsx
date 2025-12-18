@@ -5,11 +5,23 @@ import { apiGet, apiPost } from '../../utils/api';
 interface Stats {
   rsvps: {
     total: number;
+    totalGuests: number;
+    confirmed: number;
+    confirmedGuests: number;
+    unconfirmed: number;
+    unconfirmedGuests: number;
+    smsSent: number;
     recent: number;
     list: Array<{
+      id: string;
       name: string;
       email: string;
       phone: string;
+      guests: number;
+      confirmed: boolean;
+      confirmed_at: string | null;
+      sms_sent: boolean;
+      sms_sent_at: string | null;
       created_at: string;
     }>;
   };
@@ -331,11 +343,36 @@ export function AdminPortal() {
                   <div className="stat-card">
                     <div className="stat-icon">👥</div>
                     <div className="stat-content">
-                      <div className="stat-value">{stats.rsvps.total}</div>
-                      <div className="stat-label">Total RSVPs</div>
+                      <div className="stat-value">{stats.rsvps.totalGuests || stats.rsvps.total}</div>
+                      <div className="stat-label">Total Guests</div>
+                      <div className="stat-detail">
+                        {stats.rsvps.total} RSVPs
+                      </div>
                       {stats.rsvps.recent > 0 && (
                         <div className="stat-recent">+{stats.rsvps.recent} this week</div>
                       )}
+                    </div>
+                  </div>
+
+                  <div className="stat-card stat-card--success">
+                    <div className="stat-icon">✅</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{stats.rsvps.confirmedGuests || 0}</div>
+                      <div className="stat-label">Confirmed Guests</div>
+                      <div className="stat-detail">
+                        {stats.rsvps.confirmed || 0} RSVPs confirmed
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card stat-card--warning">
+                    <div className="stat-icon">⏳</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{stats.rsvps.unconfirmedGuests || 0}</div>
+                      <div className="stat-label">Awaiting Confirmation</div>
+                      <div className="stat-detail">
+                        {stats.rsvps.unconfirmed || 0} RSVPs pending
+                      </div>
                     </div>
                   </div>
 
@@ -432,7 +469,11 @@ export function AdminPortal() {
         {activeTab === 'rsvps' && stats && (
           <div className="admin-content">
             <div className="content-header">
-              <h2>RSVP List ({stats.rsvps.total})</h2>
+              <h2>RSVP List ({stats.rsvps.total} RSVPs • {stats.rsvps.totalGuests || stats.rsvps.total} guests)</h2>
+              <div className="rsvp-summary">
+                <span className="badge badge-success">✅ {stats.rsvps.confirmedGuests || 0} confirmed</span>
+                <span className="badge badge-warning">⏳ {stats.rsvps.unconfirmedGuests || 0} pending</span>
+              </div>
             </div>
             {stats.rsvps.list.length === 0 ? (
               <p className="no-data">No RSVPs yet.</p>
@@ -444,15 +485,37 @@ export function AdminPortal() {
                       <th>Name</th>
                       <th>Email</th>
                       <th>Phone</th>
+                      <th>Guests</th>
+                      <th>Status</th>
+                      <th>SMS</th>
                       <th>Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.rsvps.list.map((rsvp, idx) => (
-                      <tr key={idx}>
+                      <tr key={idx} className={rsvp.confirmed ? 'row-confirmed' : 'row-pending'}>
                         <td>{rsvp.name}</td>
                         <td>{rsvp.email}</td>
                         <td>{formatPhoneNumber(rsvp.phone)}</td>
+                        <td>{rsvp.guests || 1}</td>
+                        <td>
+                          {rsvp.confirmed ? (
+                            <span className="status-badge status-confirmed" title={rsvp.confirmed_at ? `Confirmed ${formatDate(rsvp.confirmed_at)}` : ''}>
+                              ✅ Confirmed
+                            </span>
+                          ) : (
+                            <span className="status-badge status-pending">⏳ Pending</span>
+                          )}
+                        </td>
+                        <td>
+                          {rsvp.sms_sent ? (
+                            <span className="status-badge status-sent" title={rsvp.sms_sent_at ? `Sent ${formatDate(rsvp.sms_sent_at)}` : ''}>
+                              📤 Sent
+                            </span>
+                          ) : (
+                            <span className="status-badge status-not-sent">—</span>
+                          )}
+                        </td>
                         <td>{formatDate(rsvp.created_at)}</td>
                       </tr>
                     ))}

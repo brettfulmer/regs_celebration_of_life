@@ -81,7 +81,7 @@ exports.handler = async (event) => {
 
     // Calculate recent activity (last 7 days)
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.date - 7);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const recentRSVPs = (rsvps || []).filter(r => 
       new Date(r.created_at) >= sevenDaysAgo
@@ -95,15 +95,35 @@ exports.handler = async (event) => {
       new Date(s.timestamp || s.created_at) >= sevenDaysAgo
     ).length;
 
+    // Calculate guest totals and confirmation stats
+    const totalGuests = (rsvps || []).reduce((sum, r) => sum + (r.guests || 1), 0);
+    const confirmedRSVPs = (rsvps || []).filter(r => r.confirmed);
+    const confirmedGuests = confirmedRSVPs.reduce((sum, r) => sum + (r.guests || 1), 0);
+    const unconfirmedRSVPs = (rsvps || []).filter(r => !r.confirmed);
+    const unconfirmedGuests = unconfirmedRSVPs.reduce((sum, r) => sum + (r.guests || 1), 0);
+    const smsSentCount = (rsvps || []).filter(r => r.sms_sent).length;
+
     // Build response
     const stats = {
       rsvps: {
         total: (rsvps || []).length,
+        totalGuests: totalGuests,
+        confirmed: confirmedRSVPs.length,
+        confirmedGuests: confirmedGuests,
+        unconfirmed: unconfirmedRSVPs.length,
+        unconfirmedGuests: unconfirmedGuests,
+        smsSent: smsSentCount,
         recent: recentRSVPs,
         list: (rsvps || []).map(r => ({
+          id: r.id,
           name: r.name,
           email: r.email,
           phone: r.phone,
+          guests: r.guests || 1,
+          confirmed: r.confirmed || false,
+          confirmed_at: r.confirmed_at,
+          sms_sent: r.sms_sent || false,
+          sms_sent_at: r.sms_sent_at,
           created_at: r.created_at
         }))
       },

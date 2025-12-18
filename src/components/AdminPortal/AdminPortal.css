@@ -485,3 +485,69 @@
     font-size: 13px;
   }
 }
+
+/* Stat Card Variants */
+.stat-card--success {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+}
+
+.stat-card--success .stat-value {
+  color: #28a745;
+}
+
+.stat-card--warning {
+  border-color: #ffc107;
+  background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
+}
+
+.stat-card--warning .stat-value {
+  color: #d68a00;
+}
+
+/* RSVP Summary */
+.rsvp-summary {
+  display: flex;
+  gap: 12px;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-confirmed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-sent {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-not-sent {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+/* Row highlighting */
+.row-confirmed {
+  background: rgba(40, 167, 69, 0.05);
+}
+
+.row-pending {
+  background: rgba(255, 193, 7, 0.05);
+}

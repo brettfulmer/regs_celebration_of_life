@@ -41,6 +41,10 @@ create table if not exists public.rsvps (
   email text not null,
   phone text not null,
   guests integer not null default 1,
+  confirmed boolean not null default false,
+  confirmed_at timestamptz,
+  sms_sent boolean not null default false,
+  sms_sent_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -48,6 +52,24 @@ alter table public.rsvps enable row level security;
 
 -- No public access; managed by Netlify Functions via service role.
 -- Admin can query this table to see who's attending.
+
+-- ============================================
+-- SMS CONVERSATIONS TABLE
+-- ============================================
+-- Track conversation threads by phone number for context
+
+create table if not exists public.sms_conversations (
+  id uuid primary key default gen_random_uuid(),
+  phone_number text not null,
+  rsvp_id uuid references public.rsvps(id),
+  last_message_at timestamptz not null default now(),
+  context jsonb default '{}',
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists sms_conversations_phone_idx on public.sms_conversations(phone_number);
+
+alter table public.sms_conversations enable row level security;
 
 -- ============================================
 -- SMS LOGS TABLE

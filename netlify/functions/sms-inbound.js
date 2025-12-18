@@ -22,13 +22,54 @@ Important Guidelines:
 
 Keep responses concise (SMS-friendly, under 160 characters when possible) but warm and informative.`;
 
-async function getAIResponse(userMessage) {
+// Normalize Australian phone numbers to E.164 format
+function normalizePhoneNumber(phone) {
+  if (!phone) return null;
+  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('+')) return cleaned;
+  if (cleaned.startsWith('04') && cleaned.length === 10) return '+61' + cleaned.slice(1);
+  if (cleaned.startsWith('0') && cleaned.length === 10) return '+61' + cleaned.slice(1);
+  if (cleaned.length === 9 && cleaned.startsWith('4')) return '+61' + cleaned;
+  return cleaned;
+}
+
+// Parse guest number from messages like "3", "3 guests", "change to 4"
+function parseGuestNumber(message) {
+  const normalized = message.toLowerCase().trim();
+  
+  // Direct number only
+  const directMatch = normalized.match(/^(\d+)$/);
+  if (directMatch) return parseInt(directMatch[1], 10);
+  
+  // "X guests" or "X people"
+  const guestMatch = normalized.match(/(\d+)\s*(guests?|people|persons?)/i);
+  if (guestMatch) return parseInt(guestMatch[1], 10);
+  
+  // "change to X" or "update to X"
+  const changeMatch = normalized.match(/(?:change|update|now)\s*(?:to)?\s*(\d+)/i);
+  if (changeMatch) return parseInt(changeMatch[1], 10);
+  
+  return null;
+}
+
+async function getAIResponse(userMessage, context = {}) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details and to RSVP.";
   }
 
   try {
+    let contextInfo = '';
+    if (context.name) {
+      contextInfo = `\n\nContext: You're speaking with ${context.name}`;
+      if (context.guests) {
+        contextInfo += ` who has RSVP'd for ${context.guests} guest(s)`;
+      }
+      if (context.confirmed) {
+        contextInfo += ` and has confirmed their attendance`;
+      }
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -38,7 +79,7 @@ async function getAIResponse(userMessage) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: SYSTEM_PROMPT + contextInfo },
           { role: 'user', content: userMessage }
         ],
         max_tokens: 300,
@@ -58,8 +99,55 @@ async function getAIResponse(userMessage) {
   }
 }
 
-async function checkOptOut(phoneNumber) {
-  const supabase = getSupabaseAdmin();
+async function getRSVPByPhone(supabase, phoneNumber) {
+  const { data } = await supabase
+    .from('rsvps')
+    .select('*')
+    .eq('phone', phoneNumber)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  return data;
+}
+
+async function getConversationContext(supabase, phoneNumber) {
+  const { data } = await supabase
+    .from('sms_conversations')
+    .select('*, rsvp:rsvps(*)')
+    .eq('phone_number', phoneNumber)
+    .single();
+  return data;
+}
+
+async function updateRSVPConfirmation(supabase, rsvpId) {
+  await supabase
+    .from('rsvps')
+    .update({ 
+      confirmed: true, 
+      confirmed_at: new Date().toISOString() 
+    })
+    .eq('id', rsvpId);
+}
+
+async function updateRSVPGuests(supabase, rsvpId, guests) {
+  await supabase
+    .from('rsvps')
+    .update({ guests })
+    .eq('id', rsvpId);
+}
+
+async function updateConversationContext(supabase, phoneNumber, context, rsvpId = null) {
+  await supabase
+    .from('sms_conversations')
+    .upsert({
+      phone_number: phoneNumber,
+      rsvp_id: rsvpId,
+      last_message_at: new Date().toISOString(),
+      context
+    }, { onConflict: 'phone_number' });
+}
+
+async function checkOptOut(supabase, phoneNumber) {
   const { data } = await supabase
     .from('sms_opt_outs')
     .select('phone_number')
@@ -68,22 +156,27 @@ async function checkOptOut(phoneNumber) {
   return !!data;
 }
 
-async function handleOptOut(phoneNumber) {
-  const supabase = getSupabaseAdmin();
+async function handleOptOut(supabase, phoneNumber) {
   await supabase
     .from('sms_opt_outs')
-    .insert({ phone_number: phoneNumber })
-    .onConflict('phone_number')
-    .ignore();
+    .upsert({ phone_number: phoneNumber, opted_out_at: new Date().toISOString() }, { onConflict: 'phone_number' });
 }
 
-async function logMessage(data) {
-  const supabase = getSupabaseAdmin();
+async function handleOptIn(supabase, phoneNumber) {
+  await supabase
+    .from('sms_opt_outs')
+    .delete()
+    .eq('phone_number', phoneNumber);
+}
+
+async function logMessage(supabase, data) {
   await supabase.from('sms_logs').insert(data);
 }
 
 exports.handler = async (event) => {
   console.log('[sms-inbound] Received webhook');
+
+  const supabase = getSupabaseAdmin();
 
   // Verify Twilio signature
   const twilioSignature = event.headers['x-twilio-signature'] || event.headers['X-Twilio-Signature'];
@@ -95,16 +188,14 @@ exports.handler = async (event) => {
     
     if (!twilio.validateRequest(authToken, twilioSignature, url, params)) {
       console.error('[sms-inbound] Invalid Twilio signature');
-      return {
-        statusCode: 403,
-        body: 'Forbidden'
-      };
+      return { statusCode: 403, body: 'Forbidden' };
     }
   }
 
   try {
     const params = event.body ? Object.fromEntries(new URLSearchParams(event.body)) : {};
-    const fromNumber = params.From || '';
+    const rawFrom = params.From || '';
+    const fromNumber = normalizePhoneNumber(rawFrom);
     const toNumber = params.To || '';
     const messageBody = params.Body || '';
     const messageSid = params.MessageSid || '';
@@ -112,7 +203,7 @@ exports.handler = async (event) => {
     console.log('[sms-inbound] From:', fromNumber, 'Body:', messageBody);
 
     // Log inbound message
-    await logMessage({
+    await logMessage(supabase, {
       direction: 'inbound',
       from_number: fromNumber,
       to_number: toNumber,
@@ -121,58 +212,108 @@ exports.handler = async (event) => {
       status: 'received'
     });
 
-    // Check for STOP/opt-out
     const normalizedBody = messageBody.trim().toUpperCase();
+    let replyMessage = '';
+
+    // Handle STOP/opt-out
     if (['STOP', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT'].includes(normalizedBody)) {
-      await handleOptOut(fromNumber);
-      
-      const replyMessage = "You have been unsubscribed from SMS notifications. Thank you.";
-      
-      await logMessage({
-        direction: 'outbound',
-        from_number: toNumber,
-        to_number: fromNumber,
-        message_body: replyMessage,
-        status: 'opt-out-response'
-      });
-
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'text/xml' },
-        body: `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${replyMessage}</Message></Response>`
-      };
+      await handleOptOut(supabase, fromNumber);
+      replyMessage = "You've been unsubscribed. Reply START to re-subscribe anytime.";
     }
-
-    // Check if opted out
-    const isOptedOut = await checkOptOut(fromNumber);
-    if (isOptedOut) {
-      console.log('[sms-inbound] User opted out, not responding');
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'text/xml' },
-        body: '<?xml version="1.0" encoding="UTF-8"?><Response></Response>'
-      };
+    // Handle YES confirmation or START
+    else if (['YES', 'Y', 'CONFIRM', 'START', 'SUBSCRIBE'].includes(normalizedBody)) {
+      await handleOptIn(supabase, fromNumber);
+      
+      // Check if this is a YES confirmation for an RSVP
+      const rsvp = await getRSVPByPhone(supabase, fromNumber);
+      
+      if (rsvp && !rsvp.confirmed) {
+        await updateRSVPConfirmation(supabase, rsvp.id);
+        await updateConversationContext(supabase, fromNumber, {
+          name: rsvp.name,
+          guests: rsvp.guests,
+          confirmed: true
+        }, rsvp.id);
+        
+        const guestText = rsvp.guests === 1 ? '1 guest' : `${rsvp.guests} guests`;
+        replyMessage = `Thanks ${rsvp.name}! You're confirmed for ${guestText}. We'll send final details closer to the date. Questions? Just text back!`;
+      } else if (rsvp && rsvp.confirmed) {
+        replyMessage = `You're already confirmed! Text a number to change your guest count, or ask any questions about the event.`;
+      } else {
+        replyMessage = "Thanks! You're subscribed to updates. Please RSVP at https://regscelebrationoflife.netlify.app/ if you haven't already!";
+      }
     }
-
-    // Get AI response
-    const aiReply = await getAIResponse(messageBody);
+    // Check for guest number update
+    else {
+      const guestNumber = parseGuestNumber(messageBody);
+      const rsvp = await getRSVPByPhone(supabase, fromNumber);
+      
+      if (guestNumber !== null && rsvp) {
+        // Validate reasonable guest number (1-20)
+        if (guestNumber >= 1 && guestNumber <= 20) {
+          await updateRSVPGuests(supabase, rsvp.id, guestNumber);
+          await updateConversationContext(supabase, fromNumber, {
+            name: rsvp.name,
+            guests: guestNumber,
+            confirmed: rsvp.confirmed
+          }, rsvp.id);
+          
+          const guestText = guestNumber === 1 ? '1 guest' : `${guestNumber} guests`;
+          replyMessage = `Got it, ${rsvp.name}! Updated to ${guestText}.${!rsvp.confirmed ? ' Reply YES to confirm.' : ''}`;
+        } else {
+          replyMessage = `Please enter a number between 1 and 20 for your guest count.`;
+        }
+      }
+      // Check if opted out
+      else if (await checkOptOut(supabase, fromNumber)) {
+        console.log('[sms-inbound] User opted out, not responding');
+        return {
+          statusCode: 200,
+          headers: { 'Content-Type': 'text/xml' },
+          body: '<?xml version="1.0" encoding="UTF-8"?><Response></Response>'
+        };
+      }
+      // General question - use AI
+      else {
+        const conversation = await getConversationContext(supabase, fromNumber);
+        const context = conversation?.context || {};
+        
+        // Get context from linked RSVP if available
+        if (conversation?.rsvp) {
+          context.name = conversation.rsvp.name;
+          context.guests = conversation.rsvp.guests;
+          context.confirmed = conversation.rsvp.confirmed;
+        } else if (rsvp) {
+          context.name = rsvp.name;
+          context.guests = rsvp.guests;
+          context.confirmed = rsvp.confirmed;
+        }
+        
+        replyMessage = await getAIResponse(messageBody, context);
+        
+        // Update conversation context
+        if (rsvp) {
+          await updateConversationContext(supabase, fromNumber, context, rsvp.id);
+        }
+      }
+    }
 
     // Log outbound message
-    await logMessage({
+    await logMessage(supabase, {
       direction: 'outbound',
       from_number: toNumber,
       to_number: fromNumber,
-      message_body: aiReply,
+      message_body: replyMessage,
       status: 'queued'
     });
 
-    console.log('[sms-inbound] Sending reply:', aiReply);
+    console.log('[sms-inbound] Sending reply:', replyMessage);
 
     // Send TwiML response
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/xml' },
-      body: `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${aiReply}</Message></Response>`
+      body: `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${replyMessage}</Message></Response>`
     };
   } catch (error) {
     console.error('[sms-inbound] Error:', error);
