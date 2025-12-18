@@ -33,7 +33,7 @@ async function sendSMS(client, fromNumber, toNumber, message) {
       body: message,
       from: fromNumber,
       to: toNumber,
-      statusCallback: 'https://regscelebrationoflife.netlify.app/.netlify/functions/sms-status'
+      statusCallback: 'https://www.regfulmer.com/.netlify/functions/sms-status'
     });
     
     console.log('[sms-bulk-send] SMS sent successfully:', result.sid);

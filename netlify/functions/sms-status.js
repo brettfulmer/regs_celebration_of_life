@@ -9,7 +9,7 @@ exports.handler = async (event) => {
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   
   if (authToken && twilioSignature) {
-    const url = `https://regscelebrationoflife.netlify.app/.netlify/functions/sms-status`;
+    const url = `https://www.regfulmer.com/.netlify/functions/sms-status`;
     const params = event.body ? Object.fromEntries(new URLSearchParams(event.body)) : {};
     
     if (!twilio.validateRequest(authToken, twilioSignature, url, params)) {

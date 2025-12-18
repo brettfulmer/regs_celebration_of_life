@@ -37,10 +37,10 @@ async function sendConfirmationSMS(phoneNumber, name, guests) {
     const guestText = guests === 1 ? '1 guest' : `${guests} guests`;
     
     const message = await client.messages.create({
-      body: `Thanks ${name}! You're RSVP'd to Reg's Celebration of Life (Mon 12 Jan, 12pm at Horizons, Maroubra Beach) for ${guestText}.\n\nReply YES to confirm, or text a new number if your guest count changes.\n\nQuestions? Just text us back!`,
+      body: `Thanks ${name}! You're RSVP'd to Reg's Celebration of Life (Mon 12 Jan 2026, 2pm at Coogee Legion Club) for ${guestText}.\n\nReply YES to confirm, or text a new number if your guest count changes.\n\nQuestions? Just text us back!`,
       from: fromNumber,
       to: phoneNumber,
-      statusCallback: 'https://regscelebrationoflife.netlify.app/.netlify/functions/sms-status'
+      statusCallback: 'https://www.regfulmer.com/.netlify/functions/sms-status'
     });
 
     console.log('[rsvp] Confirmation SMS sent:', message.sid);
