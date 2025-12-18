@@ -48,3 +48,35 @@ alter table public.rsvps enable row level security;
 
 -- No public access; managed by Netlify Functions via service role.
 -- Admin can query this table to see who's attending.
+
+-- ============================================
+-- SMS LOGS TABLE
+-- ============================================
+
+create table if not exists public.sms_logs (
+  id uuid primary key default gen_random_uuid(),
+  timestamp timestamptz not null default now(),
+  direction text not null, -- 'inbound' or 'outbound'
+  from_number text not null,
+  to_number text not null,
+  message_body text not null,
+  message_sid text,
+  status text not null default 'pending',
+  error_message text,
+  is_bulk boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.sms_logs enable row level security;
+
+-- ============================================
+-- SMS OPT-OUTS TABLE
+-- ============================================
+
+create table if not exists public.sms_opt_outs (
+  id uuid primary key default gen_random_uuid(),
+  phone_number text not null unique,
+  opted_out_at timestamptz not null default now()
+);
+
+alter table public.sms_opt_outs enable row level security;
