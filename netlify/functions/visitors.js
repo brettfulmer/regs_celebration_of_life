@@ -70,15 +70,23 @@ exports.handler = async (event) => {
   try {
     const supabase = getSupabaseAdmin();
     
-    // Get all page views
-    const { data: pageViews, error: pvError } = await supabase
-      .from('page_views')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(500);
-    
-    if (pvError) {
-      console.error('[visitors] Page views error:', pvError);
+    // Get all page views (handle case where table might not exist)
+    let pageViews = [];
+    try {
+      const { data: pvData, error: pvError } = await supabase
+        .from('page_views')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      
+      if (pvError) {
+        console.error('[visitors] Page views error:', pvError);
+        // If table doesn't exist, continue with empty array
+      } else {
+        pageViews = pvData || [];
+      }
+    } catch (pvErr) {
+      console.error('[visitors] Page views fetch error:', pvErr);
     }
 
     // Get all RSVPs for correlation
@@ -93,7 +101,7 @@ exports.handler = async (event) => {
     // Group by session to get unique visitors with their activity
     const sessionMap = new Map();
     
-    for (const pv of (pageViews || [])) {
+    for (const pv of pageViews) {
       if (!sessionMap.has(pv.session_id)) {
         const parsed = parseUserAgent(pv.user_agent);
         sessionMap.set(pv.session_id, {
@@ -172,7 +180,14 @@ exports.handler = async (event) => {
     // Referrer breakdown
     const referrerMap = {};
     visitors.forEach(v => {
-      const ref = v.referrer ? new URL(v.referrer).hostname : 'Direct';
+      let ref = 'Direct';
+      if (v.referrer) {
+        try {
+          ref = new URL(v.referrer).hostname;
+        } catch {
+          ref = v.referrer.substring(0, 50); // Use raw referrer if not valid URL
+        }
+      }
       referrerMap[ref] = (referrerMap[ref] || 0) + 1;
     });
     const referrerBreakdown = Object.entries(referrerMap)
