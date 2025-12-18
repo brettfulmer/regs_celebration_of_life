@@ -30,3 +30,7 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+ADMIN_PORTAL.md
+DEPLOYMENT_CHECKLIST.md
+SMS_SETUP.md
+.git-rewrite-secrets.sh
