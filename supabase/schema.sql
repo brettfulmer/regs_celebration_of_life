@@ -102,3 +102,31 @@ create table if not exists public.sms_opt_outs (
 );
 
 alter table public.sms_opt_outs enable row level security;
+
+-- ============================================
+-- PAGE VIEWS TABLE
+-- ============================================
+-- Track visitor analytics
+
+create table if not exists public.page_views (
+  id uuid primary key default gen_random_uuid(),
+  session_id text not null,
+  page text not null default '/',
+  referrer text,
+  user_agent text,
+  country text,
+  city text,
+  created_at timestamptz not null default now()
+);
+
+-- Index for efficient querying
+create index if not exists page_views_created_at_idx on public.page_views(created_at);
+create index if not exists page_views_session_idx on public.page_views(session_id);
+
+alter table public.page_views enable row level security;
+
+-- Allow anonymous inserts for tracking (no auth required)
+create policy if not exists "Public can insert page views"
+on public.page_views
+for insert
+with check (true);

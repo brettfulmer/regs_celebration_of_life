@@ -79,6 +79,20 @@ exports.handler = async (event) => {
       console.error('[admin-stats] Opt-out error:', optOutError);
     }
 
+    // Get page view stats
+    const { data: pageViews, error: pageViewError } = await supabase
+      .from('page_views')
+      .select('*');
+    
+    if (pageViewError) {
+      console.error('[admin-stats] Page view error:', pageViewError);
+    }
+
+    // Calculate unique visitors (by session_id)
+    const uniqueSessions = new Set((pageViews || []).map(pv => pv.session_id));
+    const totalPageViews = (pageViews || []).length;
+    const uniqueVisitors = uniqueSessions.size;
+
     // Calculate recent activity (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -94,6 +108,30 @@ exports.handler = async (event) => {
     const recentSMS = (smsLogs || []).filter(s => 
       new Date(s.timestamp || s.created_at) >= sevenDaysAgo
     ).length;
+
+    const recentPageViews = (pageViews || []).filter(pv => 
+      new Date(pv.created_at) >= sevenDaysAgo
+    ).length;
+
+    const recentUniqueSessions = new Set(
+      (pageViews || [])
+        .filter(pv => new Date(pv.created_at) >= sevenDaysAgo)
+        .map(pv => pv.session_id)
+    ).size;
+
+    // Get today's stats
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayPageViews = (pageViews || []).filter(pv => 
+      new Date(pv.created_at) >= today
+    ).length;
+
+    const todayUniqueSessions = new Set(
+      (pageViews || [])
+        .filter(pv => new Date(pv.created_at) >= today)
+        .map(pv => pv.session_id)
+    ).size;
 
     // Calculate guest totals and confirmation stats
     const totalGuests = (rsvps || []).reduce((sum, r) => sum + (r.guests || 1), 0);
@@ -141,6 +179,14 @@ exports.handler = async (event) => {
         bulkSent: bulkSMS.length,
         optOuts: (optOuts || []).length,
         recent: recentSMS
+      },
+      visitors: {
+        totalPageViews: totalPageViews,
+        uniqueVisitors: uniqueVisitors,
+        todayPageViews: todayPageViews,
+        todayVisitors: todayUniqueSessions,
+        last7DaysPageViews: recentPageViews,
+        last7DaysVisitors: recentUniqueSessions
       },
       activity: {
         last7Days: {

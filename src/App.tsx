@@ -15,9 +15,13 @@ import { AdminPortal } from './components/AdminPortal'
 import { MusicControl } from './components/MusicControl'
 import { ExitReminder } from './components/ExitReminder'
 import { useState, useEffect } from 'react'
+import { usePageTracking } from './hooks/usePageTracking'
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
+
+  // Track page views
+  usePageTracking();
 
   useEffect(() => {
     const checkHash = () => {

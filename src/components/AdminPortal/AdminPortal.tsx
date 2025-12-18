@@ -40,6 +40,14 @@ interface Stats {
     optOuts: number;
     recent: number;
   };
+  visitors: {
+    totalPageViews: number;
+    uniqueVisitors: number;
+    todayPageViews: number;
+    todayVisitors: number;
+    last7DaysPageViews: number;
+    last7DaysVisitors: number;
+  };
   activity: {
     last7Days: {
       rsvps: number;
@@ -815,6 +823,20 @@ export function AdminPortal() {
                       <div className="stat-detail">
                         {stats.activity.last7Days.rsvps} RSVPs • {stats.activity.last7Days.memories} memories
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card stat-card--info">
+                    <div className="stat-icon">👁️</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{stats.visitors?.uniqueVisitors || 0}</div>
+                      <div className="stat-label">Unique Visitors</div>
+                      <div className="stat-detail">
+                        {stats.visitors?.totalPageViews || 0} total page views
+                      </div>
+                      {(stats.visitors?.todayVisitors || 0) > 0 && (
+                        <div className="stat-recent">+{stats.visitors.todayVisitors} today</div>
+                      )}
                     </div>
                   </div>
                 </div>
