@@ -5,12 +5,15 @@
 
 const { getSupabaseAdmin } = require('./lib/supabaseAdmin');
 const { parseJson } = require('./lib/parseJson');
-const { buildResponse } = require('./lib/http');
+const { json, handleOptions } = require('./lib/http');
 
 exports.handler = async (event) => {
+  const optionsResponse = handleOptions(event);
+  if (optionsResponse) return optionsResponse;
+
   // Only accept POST requests
   if (event.httpMethod !== 'POST') {
-    return buildResponse(405, { error: 'Method not allowed' });
+    return json(405, { error: 'Method not allowed' });
   }
 
   try {
@@ -19,7 +22,7 @@ exports.handler = async (event) => {
 
     // Validate required fields
     if (!name || !email || !phone || !guests) {
-      return buildResponse(400, {
+      return json(400, {
         error: 'Missing required fields',
         message: 'Name, email, phone number, and number of guests are required'
       });
@@ -28,9 +31,9 @@ exports.handler = async (event) => {
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return buildResponse(400, { 
+      return json(400, {
         error: 'Invalid email',
-        message: 'Please provide a valid email address' 
+        message: 'Please provide a valid email address'
       });
     }
 
@@ -49,13 +52,13 @@ exports.handler = async (event) => {
 
     if (error) {
       console.error('Supabase error:', error);
-      return buildResponse(500, { 
+      return json(500, {
         error: 'Database error',
-        message: 'Failed to save RSVP' 
+        message: 'Failed to save RSVP'
       });
     }
 
-    return buildResponse(200, {
+    return json(200, {
       success: true,
       message: 'Thank you for your RSVP!',
       rsvp: {
@@ -67,9 +70,9 @@ exports.handler = async (event) => {
 
   } catch (err) {
     console.error('RSVP error:', err);
-    return buildResponse(500, { 
+    return json(500, {
       error: 'Server error',
-      message: 'An unexpected error occurred' 
+      message: 'An unexpected error occurred'
     });
   }
 };
