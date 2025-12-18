@@ -7,7 +7,6 @@ interface ShareButtonsProps {
 
 export function ShareButtons({ variant = 'default' }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
-  const [showNativeShare, setShowNativeShare] = useState(false);
 
   // Check if Web Share API is available
   const canNativeShare = typeof navigator !== 'undefined' && !!navigator.share;
@@ -49,11 +48,8 @@ export function ShareButtons({ variant = 'default' }: ShareButtonsProps) {
           text: shareText,
           url: shareUrl,
         });
-      } catch (err) {
+      } catch {
         // User cancelled or share failed - that's ok
-        if ((err as Error).name !== 'AbortError') {
-          setShowNativeShare(false);
-        }
       }
     }
   }, [canNativeShare, shareUrl, shareTitle, shareText]);
