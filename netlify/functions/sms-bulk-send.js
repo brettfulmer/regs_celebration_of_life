@@ -98,7 +98,33 @@ exports.handler = async (event) => {
       finalMessage += '\n\nReply STOP to opt out.';
     }
 
-    // Get opted-out numbers
+    // Normalize Australian phone numbers to E.164 format
+function normalizePhoneNumber(phone) {
+  if (!phone) return null;
+  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  
+  // Already in international format
+  if (cleaned.startsWith('+')) return cleaned;
+  
+  // Australian mobile starting with 04
+  if (cleaned.startsWith('04') && cleaned.length === 10) {
+    return '+61' + cleaned.slice(1);
+  }
+  
+  // Australian number starting with 0
+  if (cleaned.startsWith('0') && cleaned.length === 10) {
+    return '+61' + cleaned.slice(1);
+  }
+  
+  // Assume Australian if 9 digits (missing leading 0)
+  if (cleaned.length === 9 && cleaned.startsWith('4')) {
+    return '+61' + cleaned;
+  }
+  
+  return cleaned;
+}
+
+// Get opted-out numbers
     const optedOut = await getOptedOutNumbers();
 
     // Send to each recipient with throttling
@@ -107,11 +133,12 @@ exports.handler = async (event) => {
 
     for (let i = 0; i < recipients.length; i++) {
       const recipient = recipients[i];
-      const phoneNumber = recipient.phone || recipient.phoneNumber || recipient;
+      const rawPhone = recipient.phone || recipient.phoneNumber || recipient;
+      const phoneNumber = normalizePhoneNumber(rawPhone);
 
       if (!phoneNumber) {
         results.push({
-          phone: 'unknown',
+          phone: rawPhone || 'unknown',
           success: false,
           error: 'Invalid phone number'
         });
