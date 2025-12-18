@@ -17,7 +17,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const body = parseJson(event);
+    const body = parseJson(event) || {};
     const { name, email, phone, guests } = body;
 
     // Validate required fields
