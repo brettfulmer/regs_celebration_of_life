@@ -28,6 +28,7 @@ async function logMessage(data) {
 
 async function sendSMS(client, fromNumber, toNumber, message) {
   try {
+    console.log('[sms-bulk-send] Attempting to send SMS:', { from: fromNumber, to: toNumber });
     const result = await client.messages.create({
       body: message,
       from: fromNumber,
@@ -35,15 +36,39 @@ async function sendSMS(client, fromNumber, toNumber, message) {
       statusCallback: 'https://regscelebrationoflife.netlify.app/.netlify/functions/sms-status'
     });
     
+    console.log('[sms-bulk-send] SMS sent successfully:', result.sid);
     return {
       success: true,
       messageSid: result.sid,
       status: result.status
     };
   } catch (error) {
+    console.error('[sms-bulk-send] Twilio error:', {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+      moreInfo: error.moreInfo
+    });
+    
+    // Provide more detailed error messages
+    let errorMessage = error.message;
+    if (error.code === 20003) {
+      errorMessage = 'Authentication failed - check TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN';
+    } else if (error.code === 21211) {
+      errorMessage = `Invalid 'To' phone number: ${toNumber}`;
+    } else if (error.code === 21212) {
+      errorMessage = `Invalid 'From' phone number: ${fromNumber}`;
+    } else if (error.code === 21608) {
+      errorMessage = 'Phone number not verified for trial account';
+    } else if (error.code === 21614) {
+      errorMessage = 'Phone number is not SMS-capable';
+    }
+    
     return {
       success: false,
-      error: error.message
+      error: errorMessage,
+      twilioCode: error.code,
+      twilioStatus: error.status
     };
   }
 }
