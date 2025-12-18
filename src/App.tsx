@@ -12,6 +12,7 @@ import { AssistantSection } from './components/AssistantSection'
 import { AssistantWidget } from './components/AssistantWidget'
 import { ParallaxBackground } from './components/ParallaxBackground'
 import { AdminPortal } from './components/AdminPortal'
+import { MusicControl } from './components/MusicControl'
 import { useState, useEffect } from 'react'
 
 function App() {
@@ -30,9 +31,12 @@ function App() {
 
   if (isAdminMode) {
     return (
-      <div className="app">
-        <AdminPortal />
-      </div>
+      <AudioProvider>
+        <div className="app">
+          <AdminPortal />
+          <MusicControl />
+        </div>
+      </AudioProvider>
     );
   }
 
