@@ -64,9 +64,9 @@ export function EventInfoSection() {
               <h4 className="event__logistics-title">Getting there</h4>
               <ul className="event__logistics-list">
                 <li>Lift access is available</li>
-                <li>Car parking is available out the front</li>
+                <li>Street parking on Arden St and nearby, plus Coogee Beach car park</li>
                 <li>Rideshare is easy (Uber etc)</li>
-                <li>Buses run regularly from Sydney CBD — check <a href="https://transportnsw.info/trip" target="_blank" rel="noopener noreferrer">Transport NSW Trip Planner</a> for live times</li>
+                <li>Buses run regularly from Sydney CBD to Coogee — check <a href="https://transportnsw.info/trip" target="_blank" rel="noopener noreferrer">Transport NSW Trip Planner</a> for live times</li>
               </ul>
             </div>
           </div>

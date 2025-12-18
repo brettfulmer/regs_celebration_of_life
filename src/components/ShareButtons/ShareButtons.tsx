@@ -13,7 +13,7 @@ export function ShareButtons({ variant = 'default' }: ShareButtonsProps) {
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://regscelebrationoflife.netlify.app';
   const shareTitle = 'Celebrating Reg Fulmer';
-  const shareText = 'Join us to celebrate the life of Reg Fulmer at Maroubra Beach.';
+  const shareText = 'Join us to celebrate the life of Reg Fulmer at Coogee.';
 
   const handleFacebookShare = useCallback(() => {
     const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;

@@ -19,9 +19,9 @@ export const siteConfig: SiteConfig = {
     // TODO: Update with actual event details
     date: 'Monday, 12th January 2026',
     time: '2:00 PM',
-    venue: 'Horizons',
-    address: '1R Marine Parade, Maroubra NSW 2035\nSouth Maroubra Surf Life Saving Club',
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.683!2d151.2555689!3d-33.9512464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12b15fac9e6bed%3A0x9a9438b0689cfd71!2sHorizons!5e0!3m2!1sen!2sau!4v1734480000000!5m2!1sen!2sau',
+    venue: 'Coogee Legion Club',
+    address: '201 Arden St, Coogee NSW 2034',
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3311.8!2d151.2544!3d-33.9213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12b19e8d5a1a1d%3A0x5017d681632c8d0!2sCoogee%20Legion%20Club!5e0!3m2!1sen!2sau!4v1734480000000!5m2!1sen!2sau',
     dressCode: 'Relaxed and comfortable — think coastal casual. No need for anything formal.',
     description: 'An informal gathering to celebrate Reg\'s life. Come as you are, stay as long as you like, and share in the memories.'
   },
@@ -217,12 +217,12 @@ export const faqItems: FAQItem[] = [
   {
     id: 'parking',
     question: 'Is there parking nearby?',
-    answer: `There's parking available directly out the front of the venue, plus additional street parking nearby. We'd suggest arriving a little early to find a spot, especially if it's a busy beach day.`
+    answer: `There's street parking available on Arden Street and surrounding streets. The venue is also close to the Coogee Beach car park. We'd suggest arriving a little early to find a spot, especially if it's a busy beach day.`
   },
   {
     id: 'public-transport',
     question: 'How do I get there by public transport?',
-    answer: `Bus services run regularly from Sydney CBD to Maroubra Beach. Routes like the 396 and 377 service the area. We'd recommend using the Transport NSW Trip Planner for live times and the best route from where you're coming.`
+    answer: `Bus services run regularly from Sydney CBD to Coogee. Routes like the 372, 373, and 374 service the area. We'd recommend using the Transport NSW Trip Planner for live times and the best route from where you're coming.`
   },
   {
     id: 'cant-attend',
@@ -236,31 +236,31 @@ export const faqItems: FAQItem[] = [
 // ============================================
 export const localPlaces: LocalPlace[] = [
   {
-    id: 'maroubra-seals',
-    name: 'Maroubra Seals',
-    type: 'cafe',
-    description: 'Popular beachside café serving breakfast and coffee with ocean views.',
-    distance: '2 min walk'
-  },
-  {
-    id: 'quickies-maroubra',
-    name: "Quickie's Maroubra",
+    id: 'coogee-bay-hotel',
+    name: 'Coogee Bay Hotel',
     type: 'bar',
-    description: 'Local pub with bistro, perfect for a casual drink and meal.',
+    description: 'Iconic beachside pub with multiple bars, bistro, and ocean views.',
     distance: '5 min walk'
   },
   {
-    id: 'mahon-pool',
-    name: 'Mahon Pool',
-    type: 'beach',
-    description: 'Iconic ocean rock pool just north of the venue, great for a morning swim.',
-    distance: '8 min walk'
+    id: 'coogee-pavilion',
+    name: 'Coogee Pavilion',
+    type: 'restaurant',
+    description: 'Multi-level venue with rooftop bar, restaurants, and great atmosphere.',
+    distance: '5 min walk'
   },
   {
-    id: 'maroubra-beach',
-    name: 'Maroubra Beach',
+    id: 'wylies-baths',
+    name: "Wylie's Baths",
     type: 'beach',
-    description: 'Beautiful stretch of beach perfect for a walk or swim.',
+    description: 'Historic ocean pool on the cliffs south of Coogee Beach. One of Reg\'s favourites.',
+    distance: '10 min walk'
+  },
+  {
+    id: 'coogee-beach',
+    name: 'Coogee Beach',
+    type: 'beach',
+    description: 'Beautiful beach perfect for a walk or swim before or after.',
     distance: '5 min walk'
   },
   {
@@ -271,10 +271,10 @@ export const localPlaces: LocalPlace[] = [
     distance: '10 min drive'
   },
   {
-    id: 'quest-maroubra',
-    name: 'Quest Maroubra Beach',
+    id: 'crowne-plaza-coogee',
+    name: 'Crowne Plaza Coogee Beach',
     type: 'accommodation',
-    description: 'Modern serviced apartments right near the beach.',
+    description: 'Beachfront hotel with ocean views, right on Coogee Beach.',
     distance: '5 min walk'
   }
 ];
@@ -293,9 +293,9 @@ Your job is to:
 – Help guests understand the tone of the event (a relaxed celebration, not a formal wake).
 – Provide clear, kind answers about basic logistics: date, time, location, dress, general flow.
 – Suggest helpful information related to the celebration:
-   • What the weather may be like in Coogee/Maroubra on the day (using a weather service).
+   • What the weather may be like in Coogee on the day (using a weather service).
    • Transport, parking, and nearby accommodation options.
-   • Things to do around Coogee and Maroubra before or after the event.
+   • Things to do around Coogee before or after the event.
 – Answer questions gently and calmly, never pushy or salesy.
 – If details are not final or may change, be honest and say they are still being confirmed.
 – Reassure people that they can come as they are; the focus is remembering Reg in a warm, informal way.
