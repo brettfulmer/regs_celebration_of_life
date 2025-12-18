@@ -53,3 +53,13 @@
   height: 16px;
   flex-shrink: 0;
 }
+
+/* Compact variant for RSVP success screen */
+.add-to-calendar--compact {
+  flex-direction: column;
+  align-items: center;
+}
+
+.add-to-calendar--compact .add-to-calendar__buttons {
+  justify-content: center;
+}

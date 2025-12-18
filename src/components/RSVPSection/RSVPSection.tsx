@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useRSVP } from '../../hooks/useRSVP';
+import { AddToCalendar } from '../AddToCalendar';
 import './RSVPSection.css';
 
 export function RSVPSection() {
@@ -59,6 +60,12 @@ export function RSVPSection() {
               <div className="rsvp__success-icon">✓</div>
               <h3>Thanks for your RSVP!</h3>
               <p>We're looking forward to seeing you at the celebration.</p>
+              
+              <div className="rsvp__calendar-prompt">
+                <p className="rsvp__calendar-text">Save the date to your calendar:</p>
+                <AddToCalendar compact />
+              </div>
+              
               <button
                 type="button"
                 className="rsvp__another-button"
