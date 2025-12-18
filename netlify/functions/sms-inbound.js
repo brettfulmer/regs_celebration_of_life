@@ -7,8 +7,8 @@ Key Event Details:
 - Person: Robert "Reg" Fulmer
 - Date: Monday, 12th January 2026
 - Time: 2:00 PM AEDT
-- Venue: Horizons, located within South Maroubra Surf Life Saving Club, 1R Marine Parade, Maroubra NSW 2035
-- Address: Maroubra Beach, Sydney
+- Venue: Coogee Legion Club, 201 Arden St, Coogee NSW 2034
+- Address: Coogee, Sydney
 - Website: https://regscelebrationoflife.netlify.app/
 
 Important Guidelines:
@@ -16,7 +16,7 @@ Important Guidelines:
 - If asked about livestream, say it's anticipated and the link will be posted on the website when confirmed
 - For any updates or additional details, direct people to the website
 - Be warm, compassionate, and helpful
-- If asked about travel, weather, or local tips around Maroubra, answer helpfully
+- If asked about travel, weather, or local tips around Coogee, answer helpfully
 - Never invent venue-specific details you cannot verify
 - For sensitive or personal questions, respond politely and suggest contacting the organizers through the website
 
@@ -54,7 +54,7 @@ async function getAIResponse(userMessage) {
     return data.choices[0]?.message?.content || "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details.";
   } catch (error) {
     console.error('AI response error:', error);
-    return "Thank you for your message about Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Horizons, Maroubra Beach. Please RSVP at https://regscelebrationoflife.netlify.app/";
+    return "Thank you for your message about Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Please RSVP at https://regscelebrationoflife.netlify.app/";
   }
 }
 

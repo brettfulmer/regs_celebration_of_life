@@ -25,9 +25,9 @@ export function LocalInfoSection() {
     <section id="around" className="section local">
       <div className="container">
         <div className="section-title">
-          <h2>Around Maroubra</h2>
+          <h2>Around Coogee</h2>
           <p>
-            If you're making a day of it — here are a few nearby spots close to Horizons.
+            If you're making a day of it — here are a few nearby spots close to Coogee Legion Club.
           </p>
         </div>
 
