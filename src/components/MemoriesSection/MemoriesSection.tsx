@@ -160,8 +160,9 @@ export function MemoriesSection() {
           <p>
             A wall of stories, snapshots, and little moments. Short notes are welcome too —
             Reg would’ve loved that.
-          </p>
-        </div>
+          </p>          <a href="#details" className="skip-section-link">
+            Skip to Event Details ↓
+          </a>        </div>
 
         <div className="memories__layout">
           <div className="memories__form">

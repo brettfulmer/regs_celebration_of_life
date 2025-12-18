@@ -13,6 +13,7 @@ import { AssistantWidget } from './components/AssistantWidget'
 import { ParallaxBackground } from './components/ParallaxBackground'
 import { AdminPortal } from './components/AdminPortal'
 import { MusicControl } from './components/MusicControl'
+import { ExitReminder } from './components/ExitReminder'
 import { useState, useEffect } from 'react'
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
       </footer>
 
       <AssistantWidget />
+      <ExitReminder />
       </div>
     </AudioProvider>
   )

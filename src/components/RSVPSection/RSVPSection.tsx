@@ -28,6 +28,10 @@ export function RSVPSection() {
       setMessage({ type: 'success', text: result.message });
       setHasSubmitted(true);
       setFormData({ name: '', email: '', phone: '', guests: '' });
+      
+      // Notify other components that RSVP is complete
+      localStorage.setItem('reg_rsvp_complete', 'true');
+      window.dispatchEvent(new CustomEvent('rsvp-complete'));
     } else {
       setMessage({ type: 'error', text: result.message });
     }

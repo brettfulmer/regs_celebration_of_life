@@ -2,6 +2,26 @@
    MEMORIES / POLAROID WALL STYLES
    ============================================ */
 
+/* Skip section link */
+.skip-section-link {
+  display: inline-block;
+  margin-top: var(--space-md);
+  padding: 8px 16px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.skip-section-link:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 .memories__layout {
   display: grid;
   grid-template-columns: 1fr;

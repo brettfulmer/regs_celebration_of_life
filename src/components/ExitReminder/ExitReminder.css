@@ -1,0 +1,127 @@
+.exit-reminder-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.exit-reminder {
+  background: white;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 100%;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.exit-reminder__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.exit-reminder__close:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.exit-reminder__content {
+  text-align: center;
+}
+
+.exit-reminder__icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.exit-reminder__title {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.exit-reminder__text {
+  font-size: 16px;
+  color: #444;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.exit-reminder__subtext {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.exit-reminder__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.exit-reminder__actions .btn {
+  min-width: 120px;
+}
+
+.exit-reminder__actions .btn--outline {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.exit-reminder__actions .btn--outline:hover {
+  border-color: #999;
+  color: #333;
+  background: #f8f8f8;
+}
+
+@media (max-width: 480px) {
+  .exit-reminder {
+    padding: 24px;
+  }
+  
+  .exit-reminder__actions {
+    flex-direction: column;
+  }
+  
+  .exit-reminder__actions .btn {
+    width: 100%;
+  }
+}
