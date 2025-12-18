@@ -7,7 +7,7 @@ const navLinks = [
   { href: '#memories', label: 'Memories' },
   { href: '#details', label: 'Details' },
   { href: '#rsvp', label: 'RSVP' },
-  { href: '#around', label: 'Around Maroubra' },
+  { href: '#around', label: 'Around Coogee' },
   { href: '#faq', label: 'FAQ' },
 ];
 
