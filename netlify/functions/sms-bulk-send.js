@@ -111,8 +111,39 @@ exports.handler = async (event) => {
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const fromNumber = process.env.TWILIO_FROM_NUMBER;
 
+    // Debug: Log credential format (not values) to help diagnose issues
+    console.log('[sms-bulk-send] Credential check:', {
+      accountSidExists: !!accountSid,
+      accountSidLength: accountSid?.length,
+      accountSidPrefix: accountSid?.substring(0, 2),
+      authTokenExists: !!authToken,
+      authTokenLength: authToken?.length,
+      fromNumberExists: !!fromNumber,
+      fromNumberValue: fromNumber
+    });
+
     if (!accountSid || !authToken || !fromNumber) {
-      return json(500, { error: 'Twilio configuration missing' }, corsHeaders());
+      return json(500, { 
+        error: 'Twilio configuration missing',
+        debug: {
+          hasAccountSid: !!accountSid,
+          hasAuthToken: !!authToken,
+          hasFromNumber: !!fromNumber
+        }
+      }, corsHeaders());
+    }
+
+    // Validate credential format
+    if (!accountSid.startsWith('AC') || accountSid.length !== 34) {
+      return json(500, { 
+        error: `Invalid TWILIO_ACCOUNT_SID format. Should start with "AC" and be 34 chars. Got: starts with "${accountSid.substring(0, 2)}", length ${accountSid.length}` 
+      }, corsHeaders());
+    }
+
+    if (authToken.length !== 32) {
+      return json(500, { 
+        error: `Invalid TWILIO_AUTH_TOKEN format. Should be 32 chars. Got: ${authToken.length} chars` 
+      }, corsHeaders());
     }
 
     const client = twilio(accountSid, authToken);
