@@ -54,7 +54,11 @@ function parseGuestNumber(message) {
 
 async function getAIResponse(userMessage, context = {}) {
   const apiKey = process.env.OPENAI_API_KEY;
+  
+  console.log('[sms-inbound] Getting AI response, API key present:', !!apiKey);
+  
   if (!apiKey) {
+    console.warn('[sms-inbound] No OPENAI_API_KEY configured, using fallback response');
     return "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details and to RSVP.";
   }
 
@@ -70,6 +74,8 @@ async function getAIResponse(userMessage, context = {}) {
       }
     }
 
+    console.log('[sms-inbound] Calling OpenAI API...');
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -88,13 +94,19 @@ async function getAIResponse(userMessage, context = {}) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[sms-inbound] OpenAI API error:', response.status, errorText);
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details.";
+    const aiMessage = data.choices[0]?.message?.content || "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details.";
+    
+    console.log('[sms-inbound] AI response received:', aiMessage.substring(0, 50) + '...');
+    
+    return aiMessage;
   } catch (error) {
-    console.error('AI response error:', error);
+    console.error('[sms-inbound] AI response error:', error);
     return "Thank you for your message about Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Please RSVP at https://regscelebrationoflife.netlify.app/";
   }
 }
