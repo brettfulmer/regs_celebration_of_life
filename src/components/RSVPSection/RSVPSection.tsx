@@ -141,7 +141,7 @@ export function RSVPSection() {
                 className="rsvp__submit"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Count Me In'}
+                {isSubmitting ? 'Submitting...' : "I'll be attending"}
               </button>
             </form>
           )}
