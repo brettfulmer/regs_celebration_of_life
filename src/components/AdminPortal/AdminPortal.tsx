@@ -131,7 +131,41 @@ interface ContactStats {
   totalGuests: number;
 }
 
-type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'sms-questions' | 'contacts' | 'rsvps' | 'memories';
+type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'sms-questions' | 'contacts' | 'visitors' | 'rsvps' | 'memories';
+
+interface VisitorData {
+  sessionId: string;
+  firstVisit: string;
+  lastVisit: string;
+  pageViews: number;
+  pages: string[];
+  country: string;
+  city: string;
+  device: string;
+  browser: string;
+  os: string;
+  referrer: string | null;
+}
+
+interface VisitorStats {
+  totalVisitors: number;
+  totalPageViews: number;
+  todayVisitors: number;
+  todayPageViews: number;
+  yesterdayVisitors: number;
+  weekVisitors: number;
+  avgPagesPerVisit: number;
+}
+
+interface VisitorAnalytics {
+  stats: VisitorStats;
+  deviceBreakdown: { Mobile: number; Desktop: number; Tablet: number };
+  countryBreakdown: Array<{ country: string; count: number }>;
+  browserBreakdown: Array<{ browser: string; count: number }>;
+  referrerBreakdown: Array<{ source: string; count: number }>;
+  visitors: VisitorData[];
+  rsvpCount: number;
+}
 
 // SMS Templates
 const SMS_TEMPLATES = {
@@ -168,6 +202,10 @@ export function AdminPortal() {
   const [contactSearch, setContactSearch] = useState('');
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [contactFilter, setContactFilter] = useState<'all' | 'rsvp' | 'sms-only' | 'confirmed' | 'unconfirmed'>('all');
+  
+  // Visitors state
+  const [visitorAnalytics, setVisitorAnalytics] = useState<VisitorAnalytics | null>(null);
+  const [isLoadingVisitors, setIsLoadingVisitors] = useState(false);
   
   // Memories state
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -270,6 +308,27 @@ export function AdminPortal() {
       setError(err.message || 'Failed to load contacts');
     } finally {
       setIsLoadingContacts(false);
+    }
+  };
+
+  const loadVisitors = async () => {
+    setIsLoadingVisitors(true);
+    try {
+      const response = await apiGet('/.netlify/functions/visitors', {
+        'Authorization': `Bearer ${adminPassword}`
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load visitor data');
+      }
+
+      const data = await response.json();
+      setVisitorAnalytics(data);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load visitors';
+      setError(message);
+    } finally {
+      setIsLoadingVisitors(false);
     }
   };
 
@@ -632,6 +691,9 @@ export function AdminPortal() {
     if (activeTab === 'contacts') {
       loadContacts();
     }
+    if (activeTab === 'visitors') {
+      loadVisitors();
+    }
     if (activeTab === 'memories') {
       loadMemories();
     }
@@ -719,6 +781,12 @@ export function AdminPortal() {
             onClick={() => setActiveTab('contacts')}
           >
             📇 Contacts
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'visitors' ? 'admin-tab--active' : ''}`}
+            onClick={() => setActiveTab('visitors')}
+          >
+            👁️ Visitors
           </button>
         </div>
 
@@ -974,6 +1042,185 @@ export function AdminPortal() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Visitors Tab */}
+        {activeTab === 'visitors' && (
+          <div className="admin-content">
+            <div className="content-header">
+              <h2>Visitor Analytics</h2>
+              <button className="btn btn--small" onClick={loadVisitors}>
+                🔄 Refresh
+              </button>
+            </div>
+            
+            {isLoadingVisitors ? (
+              <div className="loading">Loading visitor data...</div>
+            ) : visitorAnalytics ? (
+              <>
+                {/* Stats Overview */}
+                <div className="stats-grid stats-grid--small">
+                  <div className="stat-card stat-card--info">
+                    <div className="stat-icon">👁️</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{visitorAnalytics.stats.totalVisitors}</div>
+                      <div className="stat-label">Total Visitors</div>
+                      {visitorAnalytics.stats.todayVisitors > 0 && (
+                        <div className="stat-recent">+{visitorAnalytics.stats.todayVisitors} today</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">📄</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{visitorAnalytics.stats.totalPageViews}</div>
+                      <div className="stat-label">Page Views</div>
+                      <div className="stat-detail">{visitorAnalytics.stats.avgPagesPerVisit} avg/visit</div>
+                    </div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">📅</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{visitorAnalytics.stats.weekVisitors}</div>
+                      <div className="stat-label">This Week</div>
+                      <div className="stat-detail">{visitorAnalytics.stats.yesterdayVisitors} yesterday</div>
+                    </div>
+                  </div>
+                  <div className="stat-card stat-card--success">
+                    <div className="stat-icon">✅</div>
+                    <div className="stat-content">
+                      <div className="stat-value">{visitorAnalytics.rsvpCount}</div>
+                      <div className="stat-label">RSVPs</div>
+                      <div className="stat-detail">
+                        {visitorAnalytics.stats.totalVisitors > 0 
+                          ? ((visitorAnalytics.rsvpCount / visitorAnalytics.stats.totalVisitors) * 100).toFixed(1)
+                          : 0}% conversion
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Breakdown Cards */}
+                <div className="analytics-grid">
+                  {/* Device Breakdown */}
+                  <div className="analytics-card">
+                    <h4>📱 Devices</h4>
+                    <div className="breakdown-list">
+                      <div className="breakdown-item">
+                        <span className="breakdown-label">📱 Mobile</span>
+                        <span className="breakdown-value">{visitorAnalytics.deviceBreakdown.Mobile}</span>
+                        <div className="breakdown-bar" style={{ width: `${visitorAnalytics.stats.totalVisitors > 0 ? (visitorAnalytics.deviceBreakdown.Mobile / visitorAnalytics.stats.totalVisitors) * 100 : 0}%` }}></div>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="breakdown-label">🖥️ Desktop</span>
+                        <span className="breakdown-value">{visitorAnalytics.deviceBreakdown.Desktop}</span>
+                        <div className="breakdown-bar" style={{ width: `${visitorAnalytics.stats.totalVisitors > 0 ? (visitorAnalytics.deviceBreakdown.Desktop / visitorAnalytics.stats.totalVisitors) * 100 : 0}%` }}></div>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="breakdown-label">📲 Tablet</span>
+                        <span className="breakdown-value">{visitorAnalytics.deviceBreakdown.Tablet}</span>
+                        <div className="breakdown-bar" style={{ width: `${visitorAnalytics.stats.totalVisitors > 0 ? (visitorAnalytics.deviceBreakdown.Tablet / visitorAnalytics.stats.totalVisitors) * 100 : 0}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Browser Breakdown */}
+                  <div className="analytics-card">
+                    <h4>🌐 Browsers</h4>
+                    <div className="breakdown-list">
+                      {visitorAnalytics.browserBreakdown.slice(0, 5).map(({ browser, count }) => (
+                        <div className="breakdown-item" key={browser}>
+                          <span className="breakdown-label">{browser}</span>
+                          <span className="breakdown-value">{count}</span>
+                          <div className="breakdown-bar" style={{ width: `${visitorAnalytics.stats.totalVisitors > 0 ? (count / visitorAnalytics.stats.totalVisitors) * 100 : 0}%` }}></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Country Breakdown */}
+                  <div className="analytics-card">
+                    <h4>🌍 Countries</h4>
+                    <div className="breakdown-list">
+                      {visitorAnalytics.countryBreakdown.slice(0, 5).map(({ country, count }) => (
+                        <div className="breakdown-item" key={country}>
+                          <span className="breakdown-label">{country}</span>
+                          <span className="breakdown-value">{count}</span>
+                          <div className="breakdown-bar" style={{ width: `${visitorAnalytics.stats.totalVisitors > 0 ? (count / visitorAnalytics.stats.totalVisitors) * 100 : 0}%` }}></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Referrer Breakdown */}
+                  <div className="analytics-card">
+                    <h4>🔗 Traffic Sources</h4>
+                    <div className="breakdown-list">
+                      {visitorAnalytics.referrerBreakdown.slice(0, 5).map(({ source, count }) => (
+                        <div className="breakdown-item" key={source}>
+                          <span className="breakdown-label">{source}</span>
+                          <span className="breakdown-value">{count}</span>
+                          <div className="breakdown-bar" style={{ width: `${visitorAnalytics.stats.totalVisitors > 0 ? (count / visitorAnalytics.stats.totalVisitors) * 100 : 0}%` }}></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Visitors Table */}
+                <div className="section-card">
+                  <h4>Recent Visitors</h4>
+                  <div className="table-container">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Time</th>
+                          <th>Location</th>
+                          <th>Device</th>
+                          <th>Browser</th>
+                          <th>Pages</th>
+                          <th>Source</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visitorAnalytics.visitors.slice(0, 50).map((visitor) => (
+                          <tr key={visitor.sessionId}>
+                            <td className="cell-nowrap">
+                              {new Date(visitor.firstVisit).toLocaleDateString('en-AU', {
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </td>
+                            <td>
+                              {visitor.city !== 'Unknown' ? `${visitor.city}, ` : ''}
+                              {visitor.country}
+                            </td>
+                            <td>
+                              <span className={`badge badge-${visitor.device === 'Mobile' ? 'info' : visitor.device === 'Desktop' ? 'neutral' : 'warning'}`}>
+                                {visitor.device === 'Mobile' ? '📱' : visitor.device === 'Desktop' ? '🖥️' : '📲'} {visitor.device}
+                              </span>
+                            </td>
+                            <td>{visitor.browser} / {visitor.os}</td>
+                            <td>{visitor.pageViews} views</td>
+                            <td className="cell-truncate" title={visitor.referrer || 'Direct'}>
+                              {visitor.referrer ? new URL(visitor.referrer).hostname : 'Direct'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="empty-state">
+                <p>No visitor data available yet.</p>
+                <p className="text-muted">Visitor tracking starts when people visit the site.</p>
               </div>
             )}
           </div>
