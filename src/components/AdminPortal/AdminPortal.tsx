@@ -90,7 +90,7 @@ type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'rsvps' | 'memories';
 // SMS Templates
 const SMS_TEMPLATES = {
   reminder: "Hi {name}! Just a friendly reminder to confirm your RSVP for Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Reply YES to confirm. 🕊️",
-  update: "Hi {name}! Update for Reg's Celebration of Life: [YOUR MESSAGE HERE]. See https://regscelebrationoflife.netlify.app/ for details. 🕊️",
+  update: "Hi {name}! Update for Reg's Celebration of Life: [YOUR MESSAGE HERE]. See https://www.regfulmer.com/ for details. 🕊️",
   thankyou: "Hi {name}! Thank you for confirming your attendance at Reg's Celebration of Life. We look forward to seeing you on Mon 12 Jan 2026 at 2pm. 🕊️",
   finalDetails: "Hi {name}! Final details for Reg's Celebration of Life: Mon 12 Jan 2026, 2pm at Coogee Legion Club, 200 Arden St, Coogee. Parking available nearby. See you there! 🕊️"
 };
@@ -642,7 +642,7 @@ export function AdminPortal() {
                         💭 Manage Memories
                       </button>
                       <a 
-                        href="https://regscelebrationoflife.netlify.app/" 
+                        href="https://www.regfulmer.com/" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="action-btn"

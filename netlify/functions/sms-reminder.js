@@ -89,7 +89,7 @@ exports.handler = async (event) => {
     const defaultMessages = {
       unconfirmed: "Hi {name}! Just a friendly reminder to confirm your RSVP for Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Reply YES to confirm for {guests} guest(s). 🕊️",
       confirmed: "Hi {name}! Thanks for confirming! Just a reminder that Reg's Celebration of Life is on Mon 12 Jan 2026, 2pm at Coogee Legion Club. See you there! 🕊️",
-      all: "Hi {name}! Reminder: Reg's Celebration of Life is Mon 12 Jan 2026, 2pm at Coogee Legion Club. Visit https://regscelebrationoflife.netlify.app/ for details. 🕊️"
+      all: "Hi {name}! Reminder: Reg's Celebration of Life is Mon 12 Jan 2026, 2pm at Coogee Legion Club. Visit https://www.regfulmer.com/ for details. 🕊️"
     };
 
     const messageTemplate = customMessage || defaultMessages[type] || defaultMessages.all;

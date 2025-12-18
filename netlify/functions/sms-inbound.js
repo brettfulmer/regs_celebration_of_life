@@ -9,7 +9,7 @@ Key Event Details:
 - Time: 2:00 PM AEDT
 - Venue: Coogee Legion Club, 200 Arden St, Coogee NSW 2034
 - Address: Coogee, Sydney
-- Website: https://regscelebrationoflife.netlify.app/
+- Website: https://www.regfulmer.com/
 
 Important Guidelines:
 - Always encourage people to RSVP on the website so organizers can plan for numbers
@@ -59,7 +59,7 @@ async function getAIResponse(userMessage, context = {}) {
   
   if (!apiKey) {
     console.warn('[sms-inbound] No OPENAI_API_KEY configured, using fallback response');
-    return "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details and to RSVP.";
+    return "Thank you for your message. Please visit https://www.regfulmer.com/ for event details and to RSVP.";
   }
 
   try {
@@ -100,14 +100,14 @@ async function getAIResponse(userMessage, context = {}) {
     }
 
     const data = await response.json();
-    const aiMessage = data.choices[0]?.message?.content || "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details.";
+    const aiMessage = data.choices[0]?.message?.content || "Thank you for your message. Please visit https://www.regfulmer.com/ for event details.";
     
     console.log('[sms-inbound] AI response received:', aiMessage.substring(0, 50) + '...');
     
     return aiMessage;
   } catch (error) {
     console.error('[sms-inbound] AI response error:', error);
-    return "Thank you for your message about Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Please RSVP at https://regscelebrationoflife.netlify.app/";
+    return "Thank you for your message about Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Coogee Legion Club. Please RSVP at https://www.regfulmer.com/";
   }
 }
 
@@ -252,7 +252,7 @@ exports.handler = async (event) => {
       } else if (rsvp && rsvp.confirmed) {
         replyMessage = `You're already confirmed! Text a number to change your guest count, or ask any questions about the event.`;
       } else {
-        replyMessage = "Thanks! You're subscribed to updates. Please RSVP at https://regscelebrationoflife.netlify.app/ if you haven't already!";
+        replyMessage = "Thanks! You're subscribed to updates. Please RSVP at https://www.regfulmer.com/ if you haven't already!";
       }
     }
     // Check for guest number update

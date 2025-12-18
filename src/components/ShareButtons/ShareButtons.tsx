@@ -11,7 +11,7 @@ export function ShareButtons({ variant = 'default' }: ShareButtonsProps) {
   // Check if Web Share API is available
   const canNativeShare = typeof navigator !== 'undefined' && !!navigator.share;
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://regscelebrationoflife.netlify.app';
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://www.regfulmer.com';
   const shareTitle = 'Celebrating Reg Fulmer';
   const shareText = 'Join us to celebrate the life of Reg Fulmer at Coogee.';
 

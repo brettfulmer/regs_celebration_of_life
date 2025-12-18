@@ -59,7 +59,7 @@ export function AddToCalendar() {
       `SUMMARY:${EVENT_TITLE}`,
       `DESCRIPTION:${EVENT_DESCRIPTION.replace(/\n/g, '\\n')}`,
       `LOCATION:${EVENT_LOCATION.replace(/,/g, '\\,')}`,
-      `URL:https://regscelebrationoflife.netlify.app/`,
+      `URL:https://www.regfulmer.com/`,
       'STATUS:CONFIRMED',
       'END:VEVENT',
       'END:VCALENDAR',
