@@ -21,7 +21,7 @@ export const siteConfig: SiteConfig = {
     time: '2:00 PM',
     venue: 'Coogee Legion Club',
     address: '201 Arden St, Coogee NSW 2034',
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3311.8!2d151.2544!3d-33.9213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12b19e8d5a1a1d%3A0x5017d681632c8d0!2sCoogee%20Legion%20Club!5e0!3m2!1sen!2sau!4v1734480000000!5m2!1sen!2sau',
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3311.5!2d151.2531!3d-33.9198!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12b1977bcae45b%3A0xc3e5392a5e78c91e!2sCoogee%20Legion%20Club!5e0!3m2!1sen!2sau!4v1734480000000!5m2!1sen!2sau',
     dressCode: 'Relaxed and comfortable — think coastal casual. No need for anything formal.',
     description: 'An informal gathering to celebrate Reg\'s life. Come as you are, stay as long as you like, and share in the memories.'
   },
