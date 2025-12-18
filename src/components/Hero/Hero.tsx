@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { heroContent } from '../../data/demoData';
+import { ShareButtons } from '../ShareButtons';
 import './Hero.css';
 
 export function Hero() {
@@ -75,6 +76,11 @@ export function Hero() {
           <a href="#rsvp" className="btn btn--secondary">
             RSVP
           </a>
+        </div>
+
+        {/* Share buttons */}
+        <div className="hero__share">
+          <ShareButtons />
         </div>
       </div>
 

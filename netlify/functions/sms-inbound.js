@@ -5,8 +5,8 @@ const SYSTEM_PROMPT = `You are a helpful assistant for the Celebration of Life m
 
 Key Event Details:
 - Person: Robert "Reg" Fulmer
-- Date: Monday, 12th December 2025
-- Time: 12:00 PM AEDT
+- Date: Monday, 12th January 2026
+- Time: 2:00 PM AEDT
 - Venue: Horizons, located within South Maroubra Surf Life Saving Club, 1R Marine Parade, Maroubra NSW 2035
 - Address: Maroubra Beach, Sydney
 - Website: https://regscelebrationoflife.netlify.app/
@@ -54,7 +54,7 @@ async function getAIResponse(userMessage) {
     return data.choices[0]?.message?.content || "Thank you for your message. Please visit https://regscelebrationoflife.netlify.app/ for event details.";
   } catch (error) {
     console.error('AI response error:', error);
-    return "Thank you for your message about Reg's Celebration of Life on Mon 12 Dec, 12pm at Horizons, Maroubra Beach. Please RSVP at https://regscelebrationoflife.netlify.app/";
+    return "Thank you for your message about Reg's Celebration of Life on Mon 12 Jan 2026, 2pm at Horizons, Maroubra Beach. Please RSVP at https://regscelebrationoflife.netlify.app/";
   }
 }
 

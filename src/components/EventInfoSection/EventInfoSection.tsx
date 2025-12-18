@@ -1,4 +1,5 @@
 import { siteConfig } from '../../data/demoData';
+import { AddToCalendar } from '../AddToCalendar';
 import './EventInfoSection.css';
 
 export function EventInfoSection() {
@@ -26,7 +27,12 @@ export function EventInfoSection() {
               </div>
               <div className="event__row">
                 <dt>Time</dt>
-                <dd>{details.time}</dd>
+                <dd>
+                  {details.time}
+                  <div className="event__calendar">
+                    <AddToCalendar />
+                  </div>
+                </dd>
               </div>
               <div className="event__row">
                 <dt>Where</dt>
@@ -52,6 +58,16 @@ export function EventInfoSection() {
               <p>
                 RSVP below to be kept up to date with all the details as they're confirmed.
               </p>
+            </div>
+
+            <div className="event__logistics">
+              <h4 className="event__logistics-title">Getting there</h4>
+              <ul className="event__logistics-list">
+                <li>Lift access is available</li>
+                <li>Car parking is available out the front</li>
+                <li>Rideshare is easy (Uber etc)</li>
+                <li>Buses run regularly from Sydney CBD — check <a href="https://transportnsw.info/trip" target="_blank" rel="noopener noreferrer">Transport NSW Trip Planner</a> for live times</li>
+              </ul>
             </div>
           </div>
 

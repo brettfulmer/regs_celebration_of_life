@@ -17,7 +17,7 @@ export const siteConfig: SiteConfig = {
   
   eventDetails: {
     // TODO: Update with actual event details
-    date: 'Monday, 12th December 2025',
+    date: 'Monday, 12th January 2026',
     time: '2:00 PM',
     venue: 'Horizons',
     address: '1R Marine Parade, Maroubra NSW 2035\nSouth Maroubra Surf Life Saving Club',
@@ -217,7 +217,12 @@ export const faqItems: FAQItem[] = [
   {
     id: 'parking',
     question: 'Is there parking nearby?',
-    answer: `Street parking is available around Coogee, though it can be busy on weekends. We'd recommend coming early or considering public transport. The venue is also accessible by bus from the city.`
+    answer: `There's parking available directly out the front of the venue, plus additional street parking nearby. We'd suggest arriving a little early to find a spot, especially if it's a busy beach day.`
+  },
+  {
+    id: 'public-transport',
+    question: 'How do I get there by public transport?',
+    answer: `Bus services run regularly from Sydney CBD to Maroubra Beach. Routes like the 396 and 377 service the area. We'd recommend using the Transport NSW Trip Planner for live times and the best route from where you're coming.`
   },
   {
     id: 'cant-attend',
