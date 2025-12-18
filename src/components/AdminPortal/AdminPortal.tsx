@@ -100,7 +100,30 @@ interface QuestionSummary {
   };
 }
 
-type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'sms-questions' | 'rsvps' | 'memories';
+interface Contact {
+  id: string;
+  name: string | null;
+  phone: string;
+  phoneDisplay: string;
+  email: string | null;
+  guests: number | null;
+  confirmed: boolean;
+  source: 'rsvp' | 'sms';
+  hasRsvp: boolean;
+  optedOut: boolean;
+  createdAt: string | null;
+}
+
+interface ContactStats {
+  total: number;
+  withRsvp: number;
+  smsOnly: number;
+  confirmed: number;
+  optedOut: number;
+  totalGuests: number;
+}
+
+type TabType = 'dashboard' | 'sms-send' | 'sms-logs' | 'sms-questions' | 'contacts' | 'rsvps' | 'memories';
 
 // SMS Templates
 const SMS_TEMPLATES = {
@@ -129,6 +152,14 @@ export function AdminPortal() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [questionSummary, setQuestionSummary] = useState<QuestionSummary>({});
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  
+  // Contacts state
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contactStats, setContactStats] = useState<ContactStats | null>(null);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(false);
+  const [contactSearch, setContactSearch] = useState('');
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [contactFilter, setContactFilter] = useState<'all' | 'rsvp' | 'sms-only' | 'confirmed' | 'unconfirmed'>('all');
   
   // Memories state
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -210,6 +241,27 @@ export function AdminPortal() {
       setError(err.message || 'Failed to load questions');
     } finally {
       setIsLoadingQuestions(false);
+    }
+  };
+
+  const loadContacts = async () => {
+    setIsLoadingContacts(true);
+    try {
+      const response = await apiGet('/.netlify/functions/contacts', {
+        'Authorization': `Bearer ${adminPassword}`
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load contacts');
+      }
+
+      const data = await response.json();
+      setContacts(data.contacts || []);
+      setContactStats(data.stats || null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load contacts');
+    } finally {
+      setIsLoadingContacts(false);
     }
   };
 
@@ -464,6 +516,59 @@ export function AdminPortal() {
     });
   };
 
+  // Filter contacts based on search and filter
+  const filteredContacts = contacts.filter(contact => {
+    // Apply filter
+    if (contactFilter === 'rsvp' && !contact.hasRsvp) return false;
+    if (contactFilter === 'sms-only' && contact.hasRsvp) return false;
+    if (contactFilter === 'confirmed' && !contact.confirmed) return false;
+    if (contactFilter === 'unconfirmed' && contact.confirmed) return false;
+    
+    // Apply search
+    if (contactSearch) {
+      const search = contactSearch.toLowerCase();
+      const nameMatch = contact.name?.toLowerCase().includes(search);
+      const phoneMatch = contact.phone.includes(search) || contact.phoneDisplay.includes(search);
+      const emailMatch = contact.email?.toLowerCase().includes(search);
+      return nameMatch || phoneMatch || emailMatch;
+    }
+    return true;
+  });
+
+  const toggleContactSelection = (phone: string) => {
+    const newSelected = new Set(selectedContacts);
+    if (newSelected.has(phone)) {
+      newSelected.delete(phone);
+    } else {
+      newSelected.add(phone);
+    }
+    setSelectedContacts(newSelected);
+  };
+
+  const selectAllFilteredContacts = () => {
+    const eligibleContacts = filteredContacts.filter(c => !c.optedOut);
+    const allSelected = eligibleContacts.every(c => selectedContacts.has(c.phone));
+    
+    if (allSelected) {
+      // Deselect all filtered
+      const newSelected = new Set(selectedContacts);
+      eligibleContacts.forEach(c => newSelected.delete(c.phone));
+      setSelectedContacts(newSelected);
+    } else {
+      // Select all filtered
+      const newSelected = new Set(selectedContacts);
+      eligibleContacts.forEach(c => newSelected.add(c.phone));
+      setSelectedContacts(newSelected);
+    }
+  };
+
+  const sendToSelectedContacts = () => {
+    const selectedList = contacts.filter(c => selectedContacts.has(c.phone) && !c.optedOut);
+    const recipientText = selectedList.map(c => `${c.phone},${c.name || 'Guest'}`).join('\n');
+    setRecipientsText(recipientText);
+    setActiveTab('sms-send');
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadStats();
@@ -478,6 +583,9 @@ export function AdminPortal() {
     }
     if (activeTab === 'sms-questions') {
       loadQuestions();
+    }
+    if (activeTab === 'contacts') {
+      loadContacts();
     }
     if (activeTab === 'memories') {
       loadMemories();
@@ -560,6 +668,12 @@ export function AdminPortal() {
             onClick={() => setActiveTab('sms-questions')}
           >
             ❓ Questions
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'contacts' ? 'admin-tab--active' : ''}`}
+            onClick={() => setActiveTab('contacts')}
+          >
+            📇 Contacts
           </button>
         </div>
 
@@ -1128,6 +1242,184 @@ export function AdminPortal() {
                         </tbody>
                       </table>
                     </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Contacts Tab */}
+        {activeTab === 'contacts' && (
+          <div className="admin-content">
+            <div className="content-header">
+              <h2>Contact Directory</h2>
+              <button className="btn btn--small" onClick={loadContacts}>
+                Refresh
+              </button>
+            </div>
+
+            {isLoadingContacts ? (
+              <div className="loading">Loading contacts...</div>
+            ) : (
+              <>
+                {/* Contact Stats */}
+                {contactStats && (
+                  <div className="contact-stats">
+                    <div className="contact-stat">
+                      <span className="stat-number">{contactStats.total}</span>
+                      <span className="stat-label">Total</span>
+                    </div>
+                    <div className="contact-stat">
+                      <span className="stat-number">{contactStats.withRsvp}</span>
+                      <span className="stat-label">RSVPs</span>
+                    </div>
+                    <div className="contact-stat">
+                      <span className="stat-number">{contactStats.smsOnly}</span>
+                      <span className="stat-label">SMS Only</span>
+                    </div>
+                    <div className="contact-stat stat-success">
+                      <span className="stat-number">{contactStats.confirmed}</span>
+                      <span className="stat-label">Confirmed</span>
+                    </div>
+                    <div className="contact-stat stat-warning">
+                      <span className="stat-number">{contactStats.optedOut}</span>
+                      <span className="stat-label">Opted Out</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Search and Filter Controls */}
+                <div className="contacts-controls">
+                  <div className="search-box">
+                    <input
+                      type="text"
+                      placeholder="Search by name, phone, or email..."
+                      value={contactSearch}
+                      onChange={(e) => setContactSearch(e.target.value)}
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="filter-buttons">
+                    <button 
+                      className={`filter-btn ${contactFilter === 'all' ? 'active' : ''}`}
+                      onClick={() => setContactFilter('all')}
+                    >
+                      All
+                    </button>
+                    <button 
+                      className={`filter-btn ${contactFilter === 'rsvp' ? 'active' : ''}`}
+                      onClick={() => setContactFilter('rsvp')}
+                    >
+                      RSVPs
+                    </button>
+                    <button 
+                      className={`filter-btn ${contactFilter === 'sms-only' ? 'active' : ''}`}
+                      onClick={() => setContactFilter('sms-only')}
+                    >
+                      SMS Only
+                    </button>
+                    <button 
+                      className={`filter-btn ${contactFilter === 'confirmed' ? 'active' : ''}`}
+                      onClick={() => setContactFilter('confirmed')}
+                    >
+                      Confirmed
+                    </button>
+                    <button 
+                      className={`filter-btn ${contactFilter === 'unconfirmed' ? 'active' : ''}`}
+                      onClick={() => setContactFilter('unconfirmed')}
+                    >
+                      Unconfirmed
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bulk Actions */}
+                <div className="bulk-actions">
+                  <button 
+                    className="btn btn--small"
+                    onClick={selectAllFilteredContacts}
+                  >
+                    {filteredContacts.filter(c => !c.optedOut).every(c => selectedContacts.has(c.phone)) 
+                      ? '☐ Deselect All' 
+                      : '☑ Select All'}
+                  </button>
+                  {selectedContacts.size > 0 && (
+                    <button 
+                      className="btn btn--warm btn--small"
+                      onClick={sendToSelectedContacts}
+                    >
+                      📤 SMS {selectedContacts.size} Selected
+                    </button>
+                  )}
+                  <span className="selection-count">
+                    {selectedContacts.size} selected • {filteredContacts.length} shown
+                  </span>
+                </div>
+
+                {/* Contacts Table */}
+                {filteredContacts.length === 0 ? (
+                  <p className="no-data">No contacts found matching your criteria.</p>
+                ) : (
+                  <div className="data-table contacts-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th className="col-select">Select</th>
+                          <th>Name</th>
+                          <th>Phone</th>
+                          <th>Email</th>
+                          <th>Guests</th>
+                          <th>Status</th>
+                          <th>Source</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredContacts.map((contact) => (
+                          <tr 
+                            key={contact.id} 
+                            className={`${contact.optedOut ? 'opted-out' : ''} ${selectedContacts.has(contact.phone) ? 'selected' : ''}`}
+                          >
+                            <td className="col-select">
+                              <input
+                                type="checkbox"
+                                checked={selectedContacts.has(contact.phone)}
+                                onChange={() => toggleContactSelection(contact.phone)}
+                                disabled={contact.optedOut}
+                              />
+                            </td>
+                            <td className="contact-name">
+                              {contact.name || <span className="unknown">Unknown</span>}
+                            </td>
+                            <td className="contact-phone">{contact.phoneDisplay}</td>
+                            <td className="contact-email">
+                              {contact.email || <span className="no-email">-</span>}
+                            </td>
+                            <td className="contact-guests">
+                              {contact.guests !== null ? contact.guests : '-'}
+                            </td>
+                            <td className="contact-status">
+                              {contact.optedOut ? (
+                                <span className="status-badge status-opted-out">🚫 Opted Out</span>
+                              ) : contact.confirmed ? (
+                                <span className="status-badge status-confirmed">✅ Confirmed</span>
+                              ) : contact.hasRsvp ? (
+                                <span className="status-badge status-pending">⏳ Pending</span>
+                              ) : (
+                                <span className="status-badge status-unknown">-</span>
+                              )}
+                            </td>
+                            <td className="contact-source">
+                              {contact.hasRsvp ? (
+                                <span className="source-badge source-rsvp">RSVP</span>
+                              ) : (
+                                <span className="source-badge source-sms">SMS</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </>

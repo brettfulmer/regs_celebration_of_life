@@ -866,3 +866,169 @@ button.status-badge:hover {
   font-style: italic;
 }
 
+/* Contacts Tab Styles */
+.contact-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.contact-stat {
+  background: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.contact-stat .stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.contact-stat .stat-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.contact-stat.stat-success .stat-number {
+  color: #27ae60;
+}
+
+.contact-stat.stat-warning .stat-number {
+  color: #e74c3c;
+}
+
+.contacts-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-box .form-input {
+  width: 100%;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #d4a574;
+  background: #fff9f0;
+}
+
+.filter-btn.active {
+  background: #d4a574;
+  border-color: #d4a574;
+  color: white;
+}
+
+.bulk-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.selection-count {
+  font-size: 13px;
+  color: #666;
+}
+
+.contacts-table .col-select {
+  width: 50px;
+  text-align: center;
+}
+
+.contacts-table tr.opted-out {
+  opacity: 0.5;
+  background: #f8f8f8;
+}
+
+.contacts-table tr.selected {
+  background: #fff9f0;
+}
+
+.contact-name .unknown {
+  color: #999;
+  font-style: italic;
+}
+
+.contact-email .no-email {
+  color: #ccc;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-opted-out {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-confirmed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-unknown {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.source-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.source-rsvp {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.source-sms {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
